@@ -7,57 +7,59 @@ geometry: margin=0.6in
 ---
 
 
-# Load the data
+# Load Data
 
 ```{r}
 load("HW3df.rdat")
 summary(df)
 ```
 
-# Some Simple plots
 
-Distribution of Women Senders
+# Some Simple Plots
+
+Distribution of Women Senders:
 
 ```{r}
-barplot(table(df[df$SenderGender==1,]$SenderLooks))
+barplot(table(df[df$SenderGender==1, ]$SenderLooks))
 ```
 
-Distribution of Men Senders
+Distribution of Men Senders:
 
 ```{r}
-barplot(table(df[df$SenderGender==2,]$SenderLooks))
+barplot(table(df[df$SenderGender==2, ]$SenderLooks))
 ```
 
+
+# Models to Predict Probability of Sending a Message
+
+For Men and Women, we run separate Logit models to capture the impact looks of the receiver have on the probability of sending a message:
+
 ```{r}
-# Logit Models
-# For Men and Women I run separate Logit models to capture the 
-# impact looks of the receiver have on the probability of sending a message
 lres.m = glm(y~ReceiverLooks,data=df[df$SenderGender==2,],family='binomial')
-lres.f = glm(y~ReceiverLooks,data=df[df$SenderGender==1,],family='binomial')
-# Peek at results...
 summary(lres.m)
+```
+
+```{r}
+lres.f = glm(y~ReceiverLooks,data=df[df$SenderGender==1,],family='binomial')
 summary(lres.f)
 ```
 
+```{r}
+pred.prob.male=function(Xfemale){
+  predict(lres.m,newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),type='response')
+}
 
-```{r}
-# pred.prob.male=function(Xfemale){
-#  predict(lres.m,newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),type='response')
-# }
+pred.prob.female=function(Xmale){
+  predict(lres.f,newdata=data.frame(ReceiverLooks=factor(Xmale,levels=1:11)),type='response')
+}
 ```
-# And similarly for women
-```{r}
-# pred.prob.female=function(Xmale){
-#  predict(lres.f,newdata=data.frame(ReceiverLooks=factor(Xmale,levels=1:11)),type='response')
-#}
-```
+
 
 # Q1: What can you say about the preferences of sender men and women related to the looks of the receiver? Are there differences across the genders?
 
 For both men and women, it appears that the better looking the receivers are, the higher the probability for the senders to make an initial move. This positive correlation is profound among male than female. Because men generally value appearances more.
 
 
-  
 # Q2: Does the utility/preference function change depending on the looks of the Sender? Are there differences in how these changes for men and women?
 
 Yes, the utility/preference function changes depending on the looks of the sender. And there is difference between men and women.For both male and female, it seems that that the less good looking the senders, the more likely they are to initiate a response. However, this effect is more profound amongst the female senders.Also, for both gender, the less good looking are less likely to initiate a contact with the most good looking (i.e. looks that are rated as 8 or above).  
@@ -76,10 +78,10 @@ Yes, the utility/preference function changes depending on the looks of the sende
 
 # Q3: Using the pred.match function explore the match scores between men and women at various looks percentiles. Comment on and explain your findings. For example, you may want to explore why pred.match(2,10) differs from pred.match(10,2).    
 
-Generally speaking, regardless of the genders, the better looking the receivers are, the higher the matching scores.  However, it seems that the male cares about look more than female.  
+Generally speaking, regardless of the genders, the better looking the receivers are, the higher the matching scores. However, it seems that the male cares about look more than female.
 
 
-    
+
 # Q4: (Optional: Warning Difficult and Time Consuming!) How would you change the match function to account for the findings in Q2. How do the results comapre to the original pred.match function results.
 
 
