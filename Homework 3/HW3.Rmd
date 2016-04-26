@@ -232,7 +232,7 @@ lines(x=1:11,y=pred.prob.f5(1:11),type='b',pch=19,col='blue',lty=2)
 # Other interesting findings: Women level 8 behave like males. Males level 8 send more messages than average.
 
 
-````
+```
 
 
 # Q3: Using the pred.match function explore the match scores between men and women at various looks percentiles. Comment on and explain your findings. For example, you may want to explore why pred.match(2,10) differs from pred.match(10,2).    
@@ -273,26 +273,5 @@ for(i in 9:11){
 
 ```
 
-```{r}
-# More Julios Shit
-
-base.level <- 1
-plot(x=1:11,y=pred.match(base.level,1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
-lines(x=1:11,y=pred.match(1:11,base.level),type='b',pch=19,col='blue',lty=2)
-
-base.level <- 5
-plot(x=1:11,y=pred.match(base.level,1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
-lines(x=1:11,y=pred.match(1:11,base.level),type='b',pch=19,col='blue',lty=2)
-
-base.level <- 10
-plot(x=1:11,y=pred.match(base.level,1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
-lines(x=1:11,y=pred.match(1:11,base.level),type='b',pch=19,col='blue',lty=2)
-
-# They differ because it is more important for the male sender the receiver look, so there is no
-# simmetry for the results. 
-pred.match(2,10)
-pred.match(10,2)
-
-````
 
 # Q4: (Optional: Warning Difficult and Time Consuming!) How would you change the match function to account for the findings in Q2. How do the results comapre to the original pred.match function results.
