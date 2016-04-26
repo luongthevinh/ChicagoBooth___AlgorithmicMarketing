@@ -91,18 +91,6 @@ Yes, the utility/preference function changes depending on the looks of the sende
 
 
 ```{r}
-# Here is some code to help:
-#     This code estimates preferences for Sender Males with Looks rated less than 6
-#      lres.m5 = glm(y~ReceiverLooks,data=df[df$SenderGender==2 & #as.numeric(df$SenderLooks)<6,],family='binomial')
-#     We can then create a prediction function
-
-#      pred.prob.m5=function(Xfemale){
-#      predict(lres.m5,newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),type='response')
-#}
-```
-
-```{r}
-# Some Julios Shit
 #     Here is some code to help:
 #     This code estimates preferences for Sender Males with Looks rated less than 6
       lres.m5 = glm(y~ReceiverLooks,data=df[df$SenderGender==2 & as.numeric(df$SenderLooks)<6,],family='binomial')
@@ -123,7 +111,11 @@ pred.prob.m5=function(Xfemale){
       lines(x=1:11,y=pred.prob.m5(1:11),type='b',pch=19,col='darkgreen',lty=2)
       lines(x=1:11,y=pred.prob.m3(1:11),type='b',pch=19,col='red',lty=2)
       legend(2,.16, c("All", "Men Rated 5 or less","Men Rated 3 or less"), lty=c(2,2,2), col=c("steelblue", "darkgreen", "red"))
-#
+```
+
+Conclusion for males.
+
+```{r}
 #
 #     You can use these ideas to explore various levels of sender looks.
 #     Of course you can do this for women senders as well...
@@ -147,15 +139,19 @@ pred.prob.m5=function(Xfemale){
       lines(x=1:11,y=pred.prob.f5(1:11),type='b',pch=19,col='darkgreen',lty=2)
       lines(x=1:11,y=pred.prob.f3(1:11),type='b',pch=19,col='red',lty=2)
       legend(2,.11, c("All", "Women Rated 5 or less","Women Rated 3 or less"), lty=2, col=c("steelblue", "darkgreen", "red"))
+```
+Conclusion for females.
 
+For Males: It seems like the sender looks does matter because if the receiver is more than 2 levels
+higher than his max level, the prob of the message decrease. Nonetheless the probability is the 
+same for the whole sample for the lowest levels
 
-# For Males: It seems like the sender looks does matter because if the receiver is more than 2 levels
-# higher than his max level, the prob of the message decrease. Nonetheless the probability is the 
-# same for the whole sample for the lowest levels
+For Females: It seems that the probability of sending a message increases if the receiver has
+up to two more levels. On the other hand, as males, if the receiver looks is more than two
+levels higher than the sender, the proability decreases.
 
-# For Females: It seems that the probability of sending a message increases if the receiver has
-# up to two more levels. On the other hand, as males, if the receiver looks is more than two
-# levels higher than the sender, the proability decreases.
+# Review if there any conclusion to be included. 
+```{r}
 
 # Other levels
 max.level <- 3
@@ -273,26 +269,6 @@ for(i in 9:11){
 
 ```
 
-```{r}
-# More Julios Shit
 
-base.level <- 1
-plot(x=1:11,y=pred.match(base.level,1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
-lines(x=1:11,y=pred.match(1:11,base.level),type='b',pch=19,col='blue',lty=2)
 
-base.level <- 5
-plot(x=1:11,y=pred.match(base.level,1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
-lines(x=1:11,y=pred.match(1:11,base.level),type='b',pch=19,col='blue',lty=2)
-
-base.level <- 10
-plot(x=1:11,y=pred.match(base.level,1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
-lines(x=1:11,y=pred.match(1:11,base.level),type='b',pch=19,col='blue',lty=2)
-
-# They differ because it is more important for the male sender the receiver look, so there is no
-# simmetry for the results. 
-pred.match(2,10)
-pred.match(10,2)
-
-````
-
-# Q4: (Optional: Warning Difficult and Time Consuming!) How would you change the match function to account for the findings in Q2. How do the results comapre to the original pred.match function results.
+# Q4: (Optional: Warning Difficult and Time Consuming!) How would you change the match function to account for the findings in Q2. How do the results compare to the original pred.match function results.
