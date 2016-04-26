@@ -42,16 +42,23 @@ barplot(table(df[df$SenderGender==2,]$SenderLooks))
 #}
 ```
 
+# Q1: What can you say about the preferences of sender men and women related to the looks of the receiver? Are there differences across the genders?
+  
+# Q2: Does the utility/preference function change depending on the looks of the Sender? Are there differences in how these changes for men and women?
 
+```{r}
+# Here is some code to help:
+#     This code estimates preferences for Sender Males with Looks rated less than 6
+#      lres.m5 = glm(y~ReceiverLooks,data=df[df$SenderGender==2 & #as.numeric(df$SenderLooks)<6,],family='binomial')
+#     We can then create a prediction function
 
-# Q3: Using the pred.match function explore the match scores between 
-#     men and women at various looks percentiles. Comment on and 
-#     explain your findings. For example, you may want to explore 
-#     why pred.match(2,10) differs from pred.match(10,2).    
+#      pred.prob.m5=function(Xfemale){
+#      predict(lres.m5,newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),type='response')
+#}
+```
+
+# Q3: Using the pred.match function explore the match scores between men and women at various looks percentiles. Comment on and explain your findings. For example, you may want to explore why pred.match(2,10) differs from pred.match(10,2).    
     
-# Q4: (Optional: Warning Difficult and Time Consuming!) 
-#     How would you change the match function to account 
-#     for the findings in Q2. How do the results comapre to
-#     the original pred.match function results.
+# Q4: (Optional: Warning Difficult and Time Consuming!) How would you change the match function to account for the findings in Q2. How do the results comapre to the original pred.match function results.
 
 
