@@ -1,7 +1,11 @@
-# Digital and Algorithmic Marketing
-# Homework #3 (Group)
-# Instructor: Sanjog Misra
-# Topic: Matching Models
+---
+title: 'Homework #3: Matching'
+author: Eric Cheng, Julio Guzman, Vinh Luong, Jorge Ortega, Shao Zhu
+output: pdf_document
+fontsize: 12
+geometry: margin=0.6in
+---
+
 
 # I have cleand and simplified the dating data we saw in class.
 # The dataset called df has variables
@@ -14,6 +18,8 @@
 # y (0/1 :  reflecting if a message was sent)
 
 # Load the data
+
+
 load("~/Downloads/HW4df.rdat")
 summary(df)
 
