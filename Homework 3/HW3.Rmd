@@ -11,22 +11,25 @@ geometry: margin=0.6in
 
 ```{r}
 load("HW3df.rdat")
+
 summary(df)
 ```
 
 
 # Some Simple Plots
 
-Distribution of Women Senders:
+Distribution of the looks of Women senders:
 
 ```{r}
-barplot(table(df[df$SenderGender==1, ]$SenderLooks))
+barplot(
+  table(df[df$SenderGender==1, ]$SenderLooks))
 ```
 
-Distribution of Men Senders:
+Distribution of the looks of Men senders:
 
 ```{r}
-barplot(table(df[df$SenderGender==2, ]$SenderLooks))
+barplot(
+  table(df[df$SenderGender==2, ]$SenderLooks))
 ```
 
 
@@ -35,22 +38,30 @@ barplot(table(df[df$SenderGender==2, ]$SenderLooks))
 For Men and Women, we run separate Logit models to capture the impact looks of the receiver have on the probability of sending a message:
 
 ```{r}
-lres.m = glm(y~ReceiverLooks,data=df[df$SenderGender==2,],family='binomial')
+lres.m = glm(y~ReceiverLooks,data=df[df$SenderGender==2, ], family='binomial')
 summary(lres.m)
 ```
 
 ```{r}
-lres.f = glm(y~ReceiverLooks,data=df[df$SenderGender==1,],family='binomial')
+lres.f = glm(y~ReceiverLooks,data=df[df$SenderGender==1, ], family='binomial')
 summary(lres.f)
 ```
 
+Prediction functions from those models:
+
 ```{r}
 pred.prob.male=function(Xfemale){
-  predict(lres.m,newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),type='response')
+  predict(
+    lres.m,
+    newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),
+    type='response')
 }
 
 pred.prob.female=function(Xmale){
-  predict(lres.f,newdata=data.frame(ReceiverLooks=factor(Xmale,levels=1:11)),type='response')
+  predict(
+    lres.f,
+    newdata=data.frame(ReceiverLooks=factor(Xmale,levels=1:11)),
+    type='response')
 }
 ```
 
@@ -76,12 +87,11 @@ Yes, the utility/preference function changes depending on the looks of the sende
 #}
 ```
 
-# Q3: Using the pred.match function explore the match scores between men and women at various looks percentiles. Comment on and explain your findings. For example, you may want to explore why pred.match(2,10) differs from pred.match(10,2).    
+
+# Q3: Using the `pred.match` function explore the match scores between men and women at various looks percentiles. Comment on and explain your findings. For example, you may want to explore why `pred.match(2,10)` differs from `pred.match(10,2)`.    
 
 Generally speaking, regardless of the genders, the better looking the receivers are, the higher the matching scores. However, it seems that the male cares about look more than female.
 
 
-
-# Q4: (Optional: Warning Difficult and Time Consuming!) How would you change the match function to account for the findings in Q2. How do the results comapre to the original pred.match function results.
-
+# Q4: _(Optional: Warning Difficult and Time Consuming!)_ How would you change the match function to account for the findings in Q2. How do the results comapre to the original `pred.match` function results.
 
