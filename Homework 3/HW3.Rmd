@@ -221,7 +221,7 @@ lines(x=1:11,y=pred.prob.f5(1:11),type='b',pch=19,col='blue',lty=2)
 
 # Q3: Using the pred.match function explore the match scores between men and women at various looks percentiles. Comment on and explain your findings. For example, you may want to explore why pred.match(2,10) differs from pred.match(10,2).    
 
-Generally speaking, regardless of the genders, the better looking the receivers are, the higher the matching scores. However, it seems that the male cares about look more than female.
+Generally speaking, regardless of the genders, the better looking the receivers are, the higher the matching scores. However, it seems that the male cares about look more than female. For High ratings of Looks of any sender it seems that this spread tightens, meaning that good looking women value looks similarly to good looking man.
 
 ```{r}
 
