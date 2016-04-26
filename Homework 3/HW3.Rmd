@@ -76,6 +76,124 @@ Yes, the utility/preference function changes depending on the looks of the sende
 #}
 ```
 
+```{r}
+# Some Julios Shit
+#     Here is some code to help:
+#     This code estimates preferences for Sender Males with Looks rated less than 6
+      lres.m5 = glm(y~ReceiverLooks,data=df[df$SenderGender==2 & as.numeric(df$SenderLooks)<6,],family='binomial')
+#     We can then create a prediction function
+      pred.prob.m5=function(Xfemale){
+      predict(lres.m5,newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),type='response')
+}
+#     And compare to the full sample
+#     All Sender=Male 
+      plot(x=1:11,y=pred.prob.male(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
+#     for Looks < 6 
+      lines(x=1:11,y=pred.prob.m5(1:11),type='b',pch=19,col='blue',lty=2)
+#
+#
+#     You can use these ideas to explore various levels of sender looks.
+#     Of course you can do this for women senders as well...
+
+#     This code estimates preferences for Sender Males with Looks rated less than 6
+      lres.f5 = glm(y~ReceiverLooks,data=df[df$SenderGender==1 & as.numeric(df$SenderLooks)<6,],family='binomial')
+#     We can then create a prediction function
+      pred.prob.f5=function(Xmale){
+      predict(lres.f5,newdata=data.frame(ReceiverLooks=factor(Xmale,levels=1:11)),type='response')
+}
+#     And compare to the full sample
+#     All Sender=Male 
+      plot(x=1:11,y=pred.prob.female(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
+#     for Looks < 6 
+      lines(x=1:11,y=pred.prob.f5(1:11),type='b',pch=19,col='blue',lty=2)
+
+
+# For Males: It seems like the sender looks does matter because if the receiver is more than 2 levels
+# higher than his max level, the prob of the message decrease. Nonetheless the probability is the 
+# same for the whole sample for the lowest levels
+
+# For Females: It seems that the probability of sending a message increases if the receiver has
+# up to two more levels. On the other hand, as males, if the receiver looks is more than two
+# levels higher than the sender, the proability decreases.
+
+# Other levels
+max.level <- 3
+
+#     This code estimates preferences for Sender Males with Looks rated less than 6
+lres.m5 = glm(y~ReceiverLooks,data=df[df$SenderGender==2 & as.numeric(df$SenderLooks)<max.level,],family='binomial')
+#     We can then create a prediction function
+pred.prob.m5=function(Xfemale){
+  predict(lres.m5,newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),type='response')
+}
+#     And compare to the full sample
+#     All Sender=Male 
+plot(x=1:11,y=pred.prob.male(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
+#     for Looks < 6 
+lines(x=1:11,y=pred.prob.m5(1:11),type='b',pch=19,col='blue',lty=2)
+#
+#
+#     You can use these ideas to explore various levels of sender looks.
+#     Of course you can do this for women senders as well...
+
+#     This code estimates preferences for Sender Males with Looks rated less than 6
+lres.f5 = glm(y~ReceiverLooks,data=df[df$SenderGender==1 & as.numeric(df$SenderLooks)<max.level,],family='binomial')
+#     We can then create a prediction function
+pred.prob.f5=function(Xmale){
+  predict(lres.f5,newdata=data.frame(ReceiverLooks=factor(Xmale,levels=1:11)),type='response')
+}
+#     And compare to the full sample
+#     All Sender=Male 
+plot(x=1:11,y=pred.prob.female(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
+#     for Looks < 6 
+lines(x=1:11,y=pred.prob.f5(1:11),type='b',pch=19,col='blue',lty=2)
+
+
+# If max.level = 3 Males don't show a significant change in pattern (slighly increase
+# in the change of sending a message ofr lower receiver looks). Nonetheless, for females
+# the probaility of sending a message increases at all levels.
+
+# What's the behavior of the Male sender = 11 and the Woman Sender = 11?
+true.level <- 1
+
+#     This code estimates preferences for Sender Males with Looks rated as true.level
+lres.m5 = glm(y~ReceiverLooks,data=df[df$SenderGender==2 & as.numeric(df$SenderLooks)==true.level,],family='binomial')
+#     We can then create a prediction function
+pred.prob.m5=function(Xfemale){
+  predict(lres.m5,newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),type='response')
+}
+#     And compare to the full sample
+#     All Sender=Male 
+plot(x=1:11,y=pred.prob.male(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability", ylim=c(0.03, 0.25))
+#     for Looks < 6 
+lines(x=1:11,y=pred.prob.m5(1:11),type='b',pch=19,col='blue',lty=2)
+#
+#
+#     You can use these ideas to explore various levels of sender looks.
+#     Of course you can do this for women senders as well...
+
+#     This code estimates preferences for Sender Males with Looks rated as true.level
+lres.f5 = glm(y~ReceiverLooks,data=df[df$SenderGender==1 & as.numeric(df$SenderLooks)==true.level,],family='binomial')
+#     We can then create a prediction function
+pred.prob.f5=function(Xmale){
+  predict(lres.f5,newdata=data.frame(ReceiverLooks=factor(Xmale,levels=1:11)),type='response')
+}
+#     And compare to the full sample
+#     All Sender=Male 
+plot(x=1:11,y=pred.prob.female(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability", ylim=c(0, 0.15))
+#     for Looks < 6 
+lines(x=1:11,y=pred.prob.f5(1:11),type='b',pch=19,col='blue',lty=2)
+
+# As shown, males with looks of 11 are less likely to send a message to people under 10, but
+# much likely to send a message to females with 10 or 11, maybe because of more confidence
+# On the other hand, women with looks of 11, are much less likely to send a message to males
+# than the average except for males with rating of 10.
+
+# Other interesting findings: Women level 8 behave like males. Males level 8 send more messages than average.
+
+
+````
+
+
 # Q3: Using the pred.match function explore the match scores between men and women at various looks percentiles. Comment on and explain your findings. For example, you may want to explore why pred.match(2,10) differs from pred.match(10,2).    
 
 Generally speaking, regardless of the genders, the better looking the receivers are, the higher the matching scores. However, it seems that the male cares about look more than female.
@@ -107,6 +225,29 @@ for(i in 9:11){
 }
 
 ```
+
+```{r}
+# More Julios Shit
+
+base.level <- 1
+plot(x=1:11,y=pred.match(base.level,1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
+lines(x=1:11,y=pred.match(1:11,base.level),type='b',pch=19,col='blue',lty=2)
+
+base.level <- 5
+plot(x=1:11,y=pred.match(base.level,1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
+lines(x=1:11,y=pred.match(1:11,base.level),type='b',pch=19,col='blue',lty=2)
+
+base.level <- 10
+plot(x=1:11,y=pred.match(base.level,1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
+lines(x=1:11,y=pred.match(1:11,base.level),type='b',pch=19,col='blue',lty=2)
+
+# They differ because it is more important for the male sender the receiver look, so there is no
+# simmetry for the results. 
+pred.match(2,10)
+pred.match(10,2)
+
+````
+
 # Q4: (Optional: Warning Difficult and Time Consuming!) How would you change the match function to account for the findings in Q2. How do the results comapre to the original pred.match function results.
 
 
