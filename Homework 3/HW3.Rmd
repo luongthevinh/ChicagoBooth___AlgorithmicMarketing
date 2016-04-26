@@ -28,6 +28,16 @@ Distribution of Men Senders
 barplot(table(df[df$SenderGender==2,]$SenderLooks))
 ```
 
+```{r}
+# Logit Models
+# For Men and Women I run separate Logit models to capture the 
+# impact looks of the receiver have on the probability of sending a message
+lres.m = glm(y~ReceiverLooks,data=df[df$SenderGender==2,],family='binomial')
+lres.f = glm(y~ReceiverLooks,data=df[df$SenderGender==1,],family='binomial')
+# Peek at results...
+summary(lres.m)
+summary(lres.f)
+```
 
 
 ```{r}
