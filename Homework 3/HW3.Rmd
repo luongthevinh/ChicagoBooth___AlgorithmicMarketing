@@ -53,6 +53,11 @@ summary(lres.f)
 ```
 
 # Q1: What can you say about the preferences of sender men and women related to the looks of the receiver? Are there differences across the genders?
+
+#For both men and women, it appears that the better looking the receivers are, the higher the probability for the senders to make an initial move. This positive correlation is profound among male than female. Because men generally value appearances more.
+
+
+
   
 # Q2: Does the utility/preference function change depending on the looks of the Sender? Are there differences in how these changes for men and women?
 
