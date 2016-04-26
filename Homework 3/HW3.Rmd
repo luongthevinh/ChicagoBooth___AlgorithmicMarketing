@@ -224,6 +224,12 @@ lines(x=1:11,y=pred.prob.f5(1:11),type='b',pch=19,col='blue',lty=2)
 Generally speaking, regardless of the genders, the better looking the receivers are, the higher the matching scores. However, it seems that the male cares about look more than female.
 
 ```{r}
+
+pred.match = function(Xmale,Xfemale)
+{
+  as.numeric(sqrt(pred.prob.female(Xmale)*pred.prob.male(Xfemale)))
+}
+
 A = matrix (nrow=11,ncol=11, byrow=TRUE)
 for (i in 1:11){
   for (j in 1:11){
