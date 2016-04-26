@@ -107,14 +107,22 @@ Yes, the utility/preference function changes depending on the looks of the sende
 #     This code estimates preferences for Sender Males with Looks rated less than 6
       lres.m5 = glm(y~ReceiverLooks,data=df[df$SenderGender==2 & as.numeric(df$SenderLooks)<6,],family='binomial')
 #     We can then create a prediction function
-      pred.prob.m5=function(Xfemale){
+pred.prob.m5=function(Xfemale){
       predict(lres.m5,newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),type='response')
 }
+
+      lres.m3 = glm(y~ReceiverLooks,data=df[df$SenderGender==2 & as.numeric(df$SenderLooks)<4,],family='binomial')
+#     We can then create a prediction function
+      pred.prob.m3=function(Xfemale){
+        predict(lres.m3,newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),type='response')
+      }
 #     And compare to the full sample
 #     All Sender=Male 
-      plot(x=1:11,y=pred.prob.male(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
+      plot(x=1:11,y=pred.prob.male(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability", main="Male Senders Likelihood of Sending a Message")
 #     for Looks < 6 
-      lines(x=1:11,y=pred.prob.m5(1:11),type='b',pch=19,col='blue',lty=2)
+      lines(x=1:11,y=pred.prob.m5(1:11),type='b',pch=19,col='darkgreen',lty=2)
+      lines(x=1:11,y=pred.prob.m3(1:11),type='b',pch=19,col='red',lty=2)
+      legend(2,.16, c("All", "Men Rated 5 or less","Men Rated 3 or less"), lty=c(2,2,2), col=c("steelblue", "darkgreen", "red"))
 #
 #
 #     You can use these ideas to explore various levels of sender looks.
@@ -124,13 +132,21 @@ Yes, the utility/preference function changes depending on the looks of the sende
       lres.f5 = glm(y~ReceiverLooks,data=df[df$SenderGender==1 & as.numeric(df$SenderLooks)<6,],family='binomial')
 #     We can then create a prediction function
       pred.prob.f5=function(Xmale){
-      predict(lres.f5,newdata=data.frame(ReceiverLooks=factor(Xmale,levels=1:11)),type='response')
-}
+        predict(lres.f5,newdata=data.frame(ReceiverLooks=factor(Xmale,levels=1:11)),type='response')
+      }
+      
+      lres.f3 = glm(y~ReceiverLooks,data=df[df$SenderGender==1 & as.numeric(df$SenderLooks)<4,],family='binomial')
+#     We can then create a prediction function
+      pred.prob.f3=function(Xmale){
+        predict(lres.f3,newdata=data.frame(ReceiverLooks=factor(Xmale,levels=1:11)),type='response')
+      }
 #     And compare to the full sample
 #     All Sender=Male 
-      plot(x=1:11,y=pred.prob.female(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
+      plot(x=1:11,y=pred.prob.female(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability", main="Female Senders Likelihood of Sending a Message")
 #     for Looks < 6 
-      lines(x=1:11,y=pred.prob.f5(1:11),type='b',pch=19,col='blue',lty=2)
+      lines(x=1:11,y=pred.prob.f5(1:11),type='b',pch=19,col='darkgreen',lty=2)
+      lines(x=1:11,y=pred.prob.f3(1:11),type='b',pch=19,col='red',lty=2)
+      legend(2,.11, c("All", "Women Rated 5 or less","Women Rated 3 or less"), lty=2, col=c("steelblue", "darkgreen", "red"))
 
 
 # For Males: It seems like the sender looks does matter because if the receiver is more than 2 levels
@@ -178,7 +194,7 @@ lines(x=1:11,y=pred.prob.f5(1:11),type='b',pch=19,col='blue',lty=2)
 # the probaility of sending a message increases at all levels.
 
 # What's the behavior of the Male sender = 11 and the Woman Sender = 11?
-true.level <- 1
+true.level <- 8
 
 #     This code estimates preferences for Sender Males with Looks rated as true.level
 lres.m5 = glm(y~ReceiverLooks,data=df[df$SenderGender==2 & as.numeric(df$SenderLooks)==true.level,],family='binomial')
