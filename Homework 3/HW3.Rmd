@@ -87,11 +87,13 @@ legend(2, .16, c("Men", "Women"), lty=c(1,1),col=c("steelblue","darkred"))
 
 # Q2: Does the utility/preference function change depending on the looks of the Sender? Are there differences in how these changes for men and women?
 
-Yes, the utility/preference function changes depending on the looks of the sender and there is difference between men and women.  For both male and female, it seems that that the less good looking the senders, the more likely they are to send a message. However, this effect is more profound amongst the female senders.  Also, for both genders, the less good looking are less likely to initiate a contact with the most good looking (i.e. looks that are rated as 8 or above).  
+Yes, as shown in the previous graph, the utility/preference function changes depending on the looks of the sender and there are differences between men and women.  
+
+First, for both male and female, it seems that that the less good looking the senders, the more likely they are to send a message. However, this effect is more profound amongst the female senders.  Also, for both genders, the less good looking individuals are less likely to initiate a contact with the most good looking (i.e. looks that are rated as 8 or above).  
 
 
 ```{r}
-#     Here is some code to help:
+#     For Males
 #     This code estimates preferences for Sender Males with Looks rated less than 6
       lres.m5 = glm(y~ReceiverLooks,data=df[df$SenderGender==2 & as.numeric(df$SenderLooks)<6,],family='binomial')
 #     We can then create a prediction function
@@ -113,14 +115,12 @@ pred.prob.m5=function(Xfemale){
       legend(2,.16, c("All", "Men Rated 5 or less","Men Rated 3 or less"), lty=c(2,2,2), col=c("steelblue", "darkgreen", "red"))
 ```
 
-Conclusion for males.
+Second, as shown in the graph above, male senders with looks rated 5 or less are less likely to send a message to females (receiver) that have looks rated above 9 (9,10,11). This happens for Men rated 5 or less, and for men rated 3 or less as well. It is interesting to notice that Men rated "3 or less"" are less likely to send a message to women rated above 9 than men rated "5 or less". The curious finding is that these two groups have a similar probability of sending a message to women with looks rated below or equal to 8. 
+
 
 ```{r}
-#
-#     You can use these ideas to explore various levels of sender looks.
-#     Of course you can do this for women senders as well...
-
-#     This code estimates preferences for Sender Males with Looks rated less than 6
+#     For Females
+#     This code estimates preferences for Sender Females with Looks rated less than 6
       lres.f5 = glm(y~ReceiverLooks,data=df[df$SenderGender==1 & as.numeric(df$SenderLooks)<6,],family='binomial')
 #     We can then create a prediction function
       pred.prob.f5=function(Xmale){
@@ -133,22 +133,17 @@ Conclusion for males.
         predict(lres.f3,newdata=data.frame(ReceiverLooks=factor(Xmale,levels=1:11)),type='response')
       }
 #     And compare to the full sample
-#     All Sender=Male 
+#     All Sender=Female
       plot(x=1:11,y=pred.prob.female(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability", main="Female Senders Likelihood of Sending a Message")
 #     for Looks < 6 
       lines(x=1:11,y=pred.prob.f5(1:11),type='b',pch=19,col='darkgreen',lty=2)
       lines(x=1:11,y=pred.prob.f3(1:11),type='b',pch=19,col='red',lty=2)
       legend(2,.11, c("All", "Women Rated 5 or less","Women Rated 3 or less"), lty=2, col=c("steelblue", "darkgreen", "red"))
 ```
-Conclusion for females.
 
-For Males: It seems like the sender looks does matter because if the receiver is more than 2 levels
-higher than his max level, the prob of the message decrease. Nonetheless the probability is the 
-same for the whole sample for the lowest levels
+Third, as shown in the figure above, the lower the looks are rated for women (sender), the more likely are them to send a message to men (receiver) with looks rated below 9. This finding is totally different to men senders with lower rated looks, who behave similar to the whole sample for women (receiver) looks rated below 9 (shown previously). 
+Specifically, women rated 3 or less (red line) are more likely to send messages overall compared to the whole sample. The same happens for women rated 5 or less (green line), but with a slightly lower magnitude.
 
-For Females: It seems that the probability of sending a message increases if the receiver has
-up to two more levels. On the other hand, as males, if the receiver looks is more than two
-levels higher than the sender, the proability decreases.
 
 # Review if there any conclusion to be included. 
 ```{r}
