@@ -38,85 +38,139 @@ barplot(
 For Men and Women, we run separate Logit models to capture the impact looks of the receiver have on the probability of sending a message:
 
 ```{r}
-lres.m = glm(y~ReceiverLooks,data=df[df$SenderGender==2, ], family='binomial')
-summary(lres.m)
+lres.m = glm(
+  y ~ ReceiverLooks,
+  data=df[df$SenderGender==2, ],
+  family='binomial')
+
+lres.f = glm(
+  y ~ ReceiverLooks,
+  data=df[df$SenderGender==1, ],
+  family='binomial')
 ```
 
-```{r}
-lres.f = glm(y~ReceiverLooks,data=df[df$SenderGender==1, ], family='binomial')
-summary(lres.f)
-```
-
-Prediction functions from those models:
+Prediction functions based on those models:
 
 ```{r}
-pred.prob.male=function(Xfemale){
+pred.prob.male=function(Xfemale) {
   predict(
     lres.m,
-    newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),
+    newdata=data.frame(ReceiverLooks=factor(Xfemale, levels=1:11)),
     type='response')
 }
 
-pred.prob.female=function(Xmale){
+pred.prob.female=function(Xmale) {
   predict(
     lres.f,
-    newdata=data.frame(ReceiverLooks=factor(Xmale,levels=1:11)),
+    newdata=data.frame(ReceiverLooks=factor(Xmale, levels=1:11)),
     type='response')
 }
+```
 
-# using these functions I can create a match score
-# that simply multiplies the two predictions and takes a square root
-pred.match = function(Xmale,Xfemale)
-{
-  as.numeric(sqrt(pred.prob.female(Xmale)*pred.prob.male(Xfemale)))
+Using these functions we can create a simple match score being the geometric mean of the two predicted probabilities:
+
+```{r}
+pred.match = function(Xmale, Xfemale) {
+  as.numeric(
+    sqrt(
+      pred.prob.female(Xmale) *
+        pred.prob.male(Xfemale)))
 }
 ```
 
 
 # Q1: What can you say about the preferences of sender men and women related to the looks of the receiver? Are there differences across the genders?
 
-For both men and women, it appears that the better looking the receivers are, the higher the probability for the senders to make an initial move. This positive correlation is more profound among males than females, indicating that men generally value appearances more.  Men are much more likely to message a good looking receiver whereas women are only slightly more likely to message a good looking receiver.
+For both men and women, it appears that the better looking the receivers are, the higher the probability for the senders to make an initial move. This positive correlation is more profound among males than females, indicating that men generally value appearances more.  Men are much more likely to message a good-looking receiver whereas women are only slightly more likely to message a good looking receiver.
 
 ```{r}
 # We can plot the probabilities for Male Senders
-plot(x=1:11,y=pred.prob.male(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability", main="Probability of Messaging Based on Receiver Looks")
+plot(
+  x=1:11,
+  y=pred.prob.male(1:11),
+  type='b',
+  pch=19,
+  col="steelblue",
+  xlab="Receiver Looks",
+  ylab="Predicted Probability",
+  main="Probability of Messaging Based on Receiver Looks")
+
 # and over Women Senders
-lines(x=1:11,y=pred.prob.female(1:11),type='b',pch=19,col='darkred')
+lines(
+  x=1:11,
+  y=pred.prob.female(1:11),
+  type='b',
+  pch=19,
+  col='darkred')
+
 legend(2, .16, c("Men", "Women"), lty=c(1,1),col=c("steelblue","darkred"))
 ```
+
 
 # Q2: Does the utility/preference function change depending on the looks of the Sender? Are there differences in how these changes for men and women?
 
 Yes, as shown in the previous graph, the utility/preference function changes depending on the looks of the sender and there are differences between men and women.  
 
-First, for both male and female, it seems that that the less good looking the senders, the more likely they are to send a message. However, this effect is more profound amongst female senders.  Also, for both genders, the less good looking individuals are less likely to initiate a contact with the most good looking (i.e. looks that are rated as 8 or above).  
-
-
+First, for both male and female, it seems that that the less good looking the senders, the more likely they are to send a message. However, this effect is more profound amongst female senders. Also, for both genders, the less good looking individuals are less likely to initiate a contact with the most good looking (i.e. looks that are rated as 8 or above).  
 ```{r}
-#     For Males
-#     This code estimates preferences for Sender Males with Looks rated less than 6
-      lres.m5 = glm(y~ReceiverLooks,data=df[df$SenderGender==2 & as.numeric(df$SenderLooks)<6,],family='binomial')
-#     We can then create a prediction function
-pred.prob.m5=function(Xfemale){
-      predict(lres.m5,newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),type='response')
+# For Males
+# This code estimates preferences for Sender Males with Looks rated less than 6
+lres.m5 = glm(
+  y ~ ReceiverLooks,
+  data=df[df$SenderGender==2 & as.numeric(df$SenderLooks)<6, ],
+  family='binomial')
+# We can then create a prediction function
+pred.prob.m5 = function(Xfemale) {
+  predict(
+    lres.m5,
+    newdata=data.frame(ReceiverLooks=factor(Xfemale, levels=1:11)),
+    type='response')
 }
 
-      lres.m3 = glm(y~ReceiverLooks,data=df[df$SenderGender==2 & as.numeric(df$SenderLooks)<4,],family='binomial')
-#     We can then create a prediction function
-      pred.prob.m3=function(Xfemale){
-        predict(lres.m3,newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),type='response')
-      }
-#     And compare to the full sample
-#     All Sender=Male 
-      plot(x=1:11,y=pred.prob.male(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability", main="Male Senders Likelihood of Sending a Message")
-#     for Looks < 6 
-      lines(x=1:11,y=pred.prob.m5(1:11),type='b',pch=19,col='darkgreen',lty=2)
-      lines(x=1:11,y=pred.prob.m3(1:11),type='b',pch=19,col='red',lty=2)
-      legend(2,.16, c("All", "Men Rated 5 or less","Men Rated 3 or less"), lty=c(2,2,2), col=c("steelblue", "darkgreen", "red"))
+lres.m3 = glm(
+  y ~ ReceiverLooks,
+  data=df[df$SenderGender==2 & as.numeric(df$SenderLooks)<4, ],
+  family='binomial')
+
+pred.prob.m3 = function(Xfemale) {
+  predict(
+    lres.m3,
+    newdata=data.frame(ReceiverLooks=factor(Xfemale, levels=1:11)),
+    type='response')
+}
+
+# And compare to the full sample
+# All Sender=Male 
+plot(
+  x=1:11,
+  y=pred.prob.male(1:11),
+  type='b',
+  pch=19,
+  col="steelblue",
+  xlab="Receiver Looks",
+  ylab="Predicted Probability",
+  main="Male Senders Likelihood of Sending a Message")
+# for Looks < 6 
+lines(
+  x=1:11,
+  y=pred.prob.m5(1:11),
+  type='b',
+  pch=19,
+  col='darkgreen',
+  lty=2)
+
+lines(
+  x=1:11,
+  y=pred.prob.m3(1:11),
+  type='b',
+  pch=19,
+  col='red',
+  lty=2)
+
+legend(2,.16, c("All", "Men Rated 5 or less","Men Rated 3 or less"), lty=c(2,2,2), col=c("steelblue", "darkgreen", "red"))
 ```
 
 Second, as shown in the graph above, male senders with looks rated 5 or less are less likely to send a message to females (receiver) that have looks rated above 9 (9,10,11). This happens for Men rated 5 or less, and for men rated 3 or less as well. It is interesting to notice that Men rated "3 or less"" are less likely to send a message to women rated above 9 than men rated "5 or less". The curious finding is that these two groups have a similar probability of sending a message to women with looks rated below or equal to 8.  
-
 
 ```{r}
 #     For Females
@@ -141,11 +195,13 @@ Second, as shown in the graph above, male senders with looks rated 5 or less are
       legend(2,.11, c("All", "Women Rated 5 or less","Women Rated 3 or less"), lty=2, col=c("steelblue", "darkgreen", "red"))
 ```
 
-Third, as shown in the figure above, the lower the look rating for women (as the sender), the more likely they are to send a message to men (receiver) with looks rated below 9 compared to the whole sample. This finding is totally different to male senders with lower rated looks, who behave similar to the whole sample (for women (receiver) looks rated below 9 (shown previously)). 
+Third, as shown in the figure above, the lower the look rating for women (as the sender), the more likely they are to send a message to men (receiver) with looks rated below 9 compared to the whole sample. This finding is totally different to male senders with lower rated looks, who behave similar to the whole sample (for women (receiver) looks rated below 9 (shown previously)).
+
 Specifically, women rated 3 or less (red line) are more likely to send messages overall compared to the whole sample. The same happens for women rated 5 or less (green line), but with a slightly lower magnitude compared to women rated 3 or less.
 
 
-# Other interesting findings
+## Other interesting findings
+
 ```{r}
 # What's the behavior of the Male sender = 11 and the Woman Sender = 11?
 true.level <- 11
@@ -181,17 +237,16 @@ legend(2,.14, c("All", "Women Rated 11"), lty=2, col=c("black", "blue"))
 ```
 
 As shown in the figure above, males with looks of 11 are less likely to send a message to women with looks under 10, but much more likely to send a message to females with looks 10 or 11, maybe because of more confidence.
-On the other hand, women with looks of 11, are much less likely to send a message to males than the average except for males with rating of 10. This might be that women prefer good looking men but don't want the men to be as good looking as them.
 
+On the other hand, women with looks of 11, are much less likely to send a message to males than the average except for males with rating of 10. This might be that women prefer good looking men but don't want the men to be as good looking as them.
 
 
 # Q3: Using the pred.match function explore the match scores between men and women at various looks percentiles. Comment on and explain your findings. For example, you may want to explore why pred.match(2,10) differs from pred.match(10,2).    
 
-Generally speaking, regardless of the gender, the better looking the receivers are, the higher the match scores. However, it seems that men care about look more than female (as confirmed in question 1).  As shown by the graphs below, men generally have much better success (higher match scores) than women do when their receivers have higher looks ratings.  Conversely, women have much better match scores than men when their receivers have lower looks ratings.  Again, both of these conclusions result from the fact that men care are influenced much more by looks than women.  Thus, a man with look rating 2 has a much higher chance (according to match score) with a woman rated 10 than a woman rated 2 with a man rated 10. Note that for high ratings of looks it seems that this spread tightens, meaning that as the look rating increases, the difference in match scores for men and women at the top end of receiver look ratings becomes smaller.
+Generally speaking, regardless of the gender, the better looking the receivers are, the higher the match scores. However, it seems that men care about look more than female (as confirmed in question 1). As shown by the graphs below, men generally have much better success (higher match scores) than women do when their receivers have higher looks ratings. Conversely, women have much better match scores than men when their receivers have lower looks ratings. Again, both of these conclusions result from the fact that men care are influenced much more by looks than women. Thus, a man with look rating 2 has a much higher chance (according to match score) with a woman rated 10 than a woman rated 2 with a man rated 10. Note that for high ratings of looks it seems that this spread tightens, meaning that as the look rating increases, the difference in match scores for men and women at the top end of receiver look ratings becomes smaller.
 
 ```{r}
-
-pred.match = function(Xmale,Xfemale)
+pred.match = function(Xmale, Xfemale)
 {
   as.numeric(sqrt(pred.prob.female(Xmale)*pred.prob.male(Xfemale)))
 }
@@ -223,9 +278,4 @@ for(i in 9:11){
   lines(A[1:11,i],col='red', type='l')
   legend(2,A[i,11],col=c('blue','red'), lty=1,c('Male Sender','Female Sender'))
 }
-
 ```
-
-
-
-# Q4: (Optional: Warning Difficult and Time Consuming!) How would you change the match function to account for the findings in Q2. How do the results compare to the original pred.match function results.
