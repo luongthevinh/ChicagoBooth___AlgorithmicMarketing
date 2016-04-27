@@ -167,7 +167,7 @@ lines(
   col='red',
   lty=2)
 
-legend(2,.16, c("All", "Men Rated 5 or less","Men Rated 3 or less"), lty=c(2,2,2), col=c("steelblue", "darkgreen", "red"))
+legend("topleft", c("All", "Men Rated 5 or less","Men Rated 3 or less"), lty=c(2,2,2), col=c("steelblue", "darkgreen", "red"))
 ```
 
 Second, as shown in the graph above, male senders with looks rated 5 or less are less likely to send a message to females (receiver) that have looks rated above 9 (9,10,11). This happens for Men rated 5 or less, and for men rated 3 or less as well. It is interesting to notice that Men rated "3 or less"" are less likely to send a message to women rated above 9 than men rated "5 or less". The curious finding is that these two groups have a similar probability of sending a message to women with looks rated below or equal to 8.  
@@ -192,7 +192,7 @@ Second, as shown in the graph above, male senders with looks rated 5 or less are
 #     for Looks < 6 
       lines(x=1:11,y=pred.prob.f5(1:11),type='b',pch=19,col='darkgreen',lty=2)
       lines(x=1:11,y=pred.prob.f3(1:11),type='b',pch=19,col='red',lty=2)
-      legend(2,.11, c("All", "Women Rated 5 or less","Women Rated 3 or less"), lty=2, col=c("steelblue", "darkgreen", "red"))
+      legend("topleft", c("All", "Women Rated 5 or less","Women Rated 3 or less"), lty=2, col=c("steelblue", "darkgreen", "red"))
 ```
 
 Third, as shown in the figure above, the lower the look rating for women (as the sender), the more likely they are to send a message to men (receiver) with looks rated below 9 compared to the whole sample. This finding is totally different to male senders with lower rated looks, who behave similar to the whole sample (for women (receiver) looks rated below 9 (shown previously)).
@@ -217,7 +217,7 @@ pred.prob.m11=function(Xfemale){
 plot(x=1:11,y=pred.prob.male(1:11),type='b',pch=19,col="black",xlab="Receiver Looks",ylab="Predicted Probability", ylim=c(0.03, 0.25), main="Male Senders Likelihood of Sending a Message")
 #     for Looks < 6 
 lines(x=1:11,y=pred.prob.m11(1:11),type='b',pch=19,col='blue',lty=2)
-legend(2,.20, c("All", "Men Rated 11"), lty=c(2,2), col=c("black", "blue"))
+legend("topleft", c("All", "Men Rated 11"), lty=c(2,2), col=c("black", "blue"))
 ```
 
 ```{r, echo=FALSE}
@@ -235,7 +235,7 @@ pred.prob.f11=function(Xmale){
 plot(x=1:11,y=pred.prob.female(1:11),type='b',pch=19,col="black",xlab="Receiver Looks",ylab="Predicted Probability", ylim=c(0, 0.15), main="Female Senders Likelihood of Sending a Message")
 #     for Looks < 6 
 lines(x=1:11,y=pred.prob.f11(1:11),type='b',pch=19,col='blue',lty=2)
-legend(2,.14, c("All", "Women Rated 11"), lty=2, col=c("black", "blue"))
+legend("topleft", c("All", "Women Rated 11"), lty=2, col=c("black", "blue"))
 ```
 
 As shown in the figure above, males with looks of 11 are less likely to send a message to women with looks under 10, but much more likely to send a message to females with looks 10 or 11, maybe because of more confidence.
@@ -288,5 +288,4 @@ for(i in 9:11){
 
 
 
-# Q4: (Optional: Warning Difficult and Time Consuming!) How would you change the match function to account for the findings in Q2. How do the results compare to the original pred.match function results.
 
