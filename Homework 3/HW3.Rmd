@@ -141,89 +141,49 @@ Second, as shown in the graph above, male senders with looks rated 5 or less are
       legend(2,.11, c("All", "Women Rated 5 or less","Women Rated 3 or less"), lty=2, col=c("steelblue", "darkgreen", "red"))
 ```
 
-Third, as shown in the figure above, the lower the looks are rated for women (sender), the more likely are them to send a message to men (receiver) with looks rated below 9. This finding is totally different to men senders with lower rated looks, who behave similar to the whole sample for women (receiver) looks rated below 9 (shown previously). 
-Specifically, women rated 3 or less (red line) are more likely to send messages overall compared to the whole sample. The same happens for women rated 5 or less (green line), but with a slightly lower magnitude.
+Third, as shown in the figure above, the lower the looks are rated for women (sender), the more likely are them to send a message to men (receiver) with looks rated below 9 compared to the whole sample. This finding is totally different to men senders with lower rated looks, who behave similar to the whole sample (for women (receiver) looks rated below 9 (shown previously)). 
+Specifically, women rated 3 or less (red line) are more likely to send messages overall compared to the whole sample. The same happens for women rated 5 or less (green line), but with a slightly lower magnitude compared to woemn rated 3 or less.
 
 
-# Review if there any conclusion to be included. 
+# Other interesting findings
 ```{r}
-
-# Other levels
-max.level <- 3
-
-#     This code estimates preferences for Sender Males with Looks rated less than 6
-lres.m5 = glm(y~ReceiverLooks,data=df[df$SenderGender==2 & as.numeric(df$SenderLooks)<max.level,],family='binomial')
-#     We can then create a prediction function
-pred.prob.m5=function(Xfemale){
-  predict(lres.m5,newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),type='response')
-}
-#     And compare to the full sample
-#     All Sender=Male 
-plot(x=1:11,y=pred.prob.male(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
-#     for Looks < 6 
-lines(x=1:11,y=pred.prob.m5(1:11),type='b',pch=19,col='blue',lty=2)
-#
-#
-#     You can use these ideas to explore various levels of sender looks.
-#     Of course you can do this for women senders as well...
-
-#     This code estimates preferences for Sender Males with Looks rated less than 6
-lres.f5 = glm(y~ReceiverLooks,data=df[df$SenderGender==1 & as.numeric(df$SenderLooks)<max.level,],family='binomial')
-#     We can then create a prediction function
-pred.prob.f5=function(Xmale){
-  predict(lres.f5,newdata=data.frame(ReceiverLooks=factor(Xmale,levels=1:11)),type='response')
-}
-#     And compare to the full sample
-#     All Sender=Male 
-plot(x=1:11,y=pred.prob.female(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability")
-#     for Looks < 6 
-lines(x=1:11,y=pred.prob.f5(1:11),type='b',pch=19,col='blue',lty=2)
-
-
-# If max.level = 3 Males don't show a significant change in pattern (slighly increase
-# in the change of sending a message ofr lower receiver looks). Nonetheless, for females
-# the probaility of sending a message increases at all levels.
-
 # What's the behavior of the Male sender = 11 and the Woman Sender = 11?
-true.level <- 8
+true.level <- 11
 
 #     This code estimates preferences for Sender Males with Looks rated as true.level
-lres.m5 = glm(y~ReceiverLooks,data=df[df$SenderGender==2 & as.numeric(df$SenderLooks)==true.level,],family='binomial')
+lres.m11 = glm(y~ReceiverLooks,data=df[df$SenderGender==2 & as.numeric(df$SenderLooks)==true.level,],family='binomial')
 #     We can then create a prediction function
-pred.prob.m5=function(Xfemale){
-  predict(lres.m5,newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),type='response')
+pred.prob.m11=function(Xfemale){
+  predict(lres.m11,newdata=data.frame(ReceiverLooks=factor(Xfemale,levels=1:11)),type='response')
 }
 #     And compare to the full sample
 #     All Sender=Male 
-plot(x=1:11,y=pred.prob.male(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability", ylim=c(0.03, 0.25))
+plot(x=1:11,y=pred.prob.male(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability", ylim=c(0.03, 0.25), main="Male Senders Likelihood of Sending a Message")
 #     for Looks < 6 
-lines(x=1:11,y=pred.prob.m5(1:11),type='b',pch=19,col='blue',lty=2)
-#
-#
+lines(x=1:11,y=pred.prob.m11(1:11),type='b',pch=19,col='blue',lty=2)
+legend(2,.20, c("All", "Men Rated 11"), lty=c(2,2), col=c("steelblue", "blue"))
+
 #     You can use these ideas to explore various levels of sender looks.
 #     Of course you can do this for women senders as well...
 
 #     This code estimates preferences for Sender Males with Looks rated as true.level
-lres.f5 = glm(y~ReceiverLooks,data=df[df$SenderGender==1 & as.numeric(df$SenderLooks)==true.level,],family='binomial')
+lres.f11 = glm(y~ReceiverLooks,data=df[df$SenderGender==1 & as.numeric(df$SenderLooks)==true.level,],family='binomial')
 #     We can then create a prediction function
-pred.prob.f5=function(Xmale){
-  predict(lres.f5,newdata=data.frame(ReceiverLooks=factor(Xmale,levels=1:11)),type='response')
+pred.prob.f11=function(Xmale){
+  predict(lres.f11,newdata=data.frame(ReceiverLooks=factor(Xmale,levels=1:11)),type='response')
 }
 #     And compare to the full sample
 #     All Sender=Male 
-plot(x=1:11,y=pred.prob.female(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability", ylim=c(0, 0.15))
+plot(x=1:11,y=pred.prob.female(1:11),type='b',pch=19,col="steelblue",xlab="Receiver Looks",ylab="Predicted Probability", ylim=c(0, 0.15), main="Female Senders Likelihood of Sending a Message")
 #     for Looks < 6 
-lines(x=1:11,y=pred.prob.f5(1:11),type='b',pch=19,col='blue',lty=2)
-
-# As shown, males with looks of 11 are less likely to send a message to people under 10, but
-# much likely to send a message to females with 10 or 11, maybe because of more confidence
-# On the other hand, women with looks of 11, are much less likely to send a message to males
-# than the average except for males with rating of 10.
-
-# Other interesting findings: Women level 8 behave like males. Males level 8 send more messages than average.
-
-
+lines(x=1:11,y=pred.prob.f11(1:11),type='b',pch=19,col='blue',lty=2)
+legend(2,.14, c("All", "Women Rated 11"), lty=2, col=c("steelblue", "blue"))
 ```
+
+As shown in the figure above, males with looks of 11 are less likely to send a message to women with looks under 10, but much likely to send a message to females with 10 or 11, maybe because of more confidence.
+On the other hand, women with looks of 11, are much less likely to send a message to males
+than the average except for males with rating of 10. This might be that women prefer good looking mens but not as good looking as them.
+
 
 
 # Q3: Using the pred.match function explore the match scores between men and women at various looks percentiles. Comment on and explain your findings. For example, you may want to explore why pred.match(2,10) differs from pred.match(10,2).    
