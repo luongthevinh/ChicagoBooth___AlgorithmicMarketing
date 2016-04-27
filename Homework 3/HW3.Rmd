@@ -6,6 +6,7 @@ fontsize: 12
 geometry: margin=0.6in
 ---
 
+# I pledge my honor that I have not violated the Honor Code in preparation of this case assignment
 
 # Load Data
 
