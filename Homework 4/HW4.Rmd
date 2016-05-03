@@ -1,0 +1,21 @@
+---
+title: 'Homework #4: Persado'
+author: Eric Cheng, Julio Guzman, Vinh Luong, Jorge Ortega, Shao Zhu
+output: pdf_document
+fontsize: 12
+geometry: margin=0.6in
+---
+
+
+# Q1: Assuming that each all relevant variables were tested how many possible message combinations are there?
+
+
+# Q2: Estimate two logit models based on the data (assuming a simple linear specification) - one for opens and another for clicks. Discuss your results based on the nature of the variables (see variable names and descriptions tab).
+
+
+# Q3: Use the estimated models to compute predicted probabilities for all possible message combinations (separate predictions for opens and clicks). Which messages have the highes fitted response probabilities? Are the two messages similar or different? Discuss.
+
+
+# Q4: Please use the historical data provided in the project section of chalk to provide me your experimental design. See HistData.R for details.
+
+
