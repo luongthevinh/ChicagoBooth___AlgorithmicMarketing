@@ -7,7 +7,35 @@ geometry: margin=0.6in
 ---
 
 
+# Load Packages
+
+```{r}
+library(xlsx)
+library(AlgDesign)
+```
+
+
+# Load Data
+
+```{r}
+df <- read.xlsx("persado_experiment.xlsx", sheetIndex = 1)
+```
+
+
 # Q1: Assuming that each all relevant variables were tested how many possible message combinations are there?
+
+```{r}
+# Number of Levels per variable
+intro <- 4
+headline <- 4
+main_text <- 2
+button <- 2
+action <- 2
+purpose <- 4
+symbol <- 2
+```
+
+The number of possible combinations is __`r intro * headline * main_text * button * action * purpose * symbol`__.
 
 
 # Q2: Estimate two logit models based on the data (assuming a simple linear specification) - one for opens and another for clicks. Discuss your results based on the nature of the variables (see variable names and descriptions tab).
