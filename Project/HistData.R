@@ -333,7 +333,7 @@ for(i in 1:length(histdat)){
 }
 summary(model[[1]])
 Beta[[1]]
-Odds[[10]]
+Odds[[1]]
 
 # Checking that odds and probabilities are accurate
 Beta[[1]]["V13"]
@@ -344,3 +344,68 @@ p.data2 <- histdat[[1]]$Unique_Clicks[1]/histdat[[1]]$"Unique_Sent"[1]; p.data2
 for(i in 1:length(histdat)){
   Odds[[i]]
 }
+Odds[[174]]
+histdat[[174]]
+
+# Julio's approch to create matrix
+# Let's take the variable/levels that generate the most variability to later create a subset of the
+# mat. On that 'mat' we use the Russian formula
+# V1: levels 3,4,6
+# V2: levels 2,3,4,5,6
+# V3: levels 2,3,4
+# V4: levels  1,2
+# V5: levels 2,3,4,5
+# V6: levels 2,3 (maybe 6 from exp 88)
+# V7: levels 2 (I added level 1 for federov to work)
+# V8: levels 2,4,5 
+# V9: levels 2,4,5 (maybe 3 and 6 from exp 87 and 144)
+3*4*3*1*4*1*1*3*3
+
+# Factorial design
+# Reduced Factorial Design
+red.mat = gen.factorial(
+  levels=c(3,5,3,2,4,2,2,3,3),
+  varNames=paste("V",1:9,sep=""),
+  factors="all"
+)
+dim(red.mat)
+ds.red = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = red.mat, nTrials = 36,criterion="I")$design
+# The result needs to be translated into the keys above
+# For example V1 is from 1 to 3, but should be 3,4,6
+levels(ds.red$V1) <- c(3,4,6)
+levels(ds.red$V2) <- c(2,3,4,5,6)
+levels(ds.red$V3) <- c(2,3,4)
+levels(ds.red$V4) <- c(1,2)
+levels(ds.red$V5) <- c(2,3,4,5)
+levels(ds.red$V6) <- c(2,3)
+levels(ds.red$V7) <- c(1,2)
+levels(ds.red$V8) <- c(2,4,5)
+levels(ds.red$V9) <- c(2,4,5)
+ds.red
+
+opt_federov_results <- cbind(ds.red, 1/(1+exp(-predict.glm(combined_model, ds.red))))
+
+
+# Test with 2 levels for var 3
+red.mat = gen.factorial(
+  levels=c(3,5,2,2,4,2,2,3,3),
+  varNames=paste("V",1:9,sep=""),
+  factors="all"
+)
+dim(red.mat)
+ds.red = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = red.mat, nTrials = 36,criterion="I")$design
+# The result needs to be translated into the keys above
+# For example V1 is from 1 to 3, but should be 3,4,6
+levels(ds.red$V1) <- c(3,4,6)
+levels(ds.red$V2) <- c(2,3,4,5,6)
+levels(ds.red$V3) <- c(2,3)
+levels(ds.red$V4) <- c(1,2)
+levels(ds.red$V5) <- c(2,3,4,5)
+levels(ds.red$V6) <- c(2,3)
+levels(ds.red$V7) <- c(1,2)
+levels(ds.red$V8) <- c(2,4,5)
+levels(ds.red$V9) <- c(2,4,5)
+ds.red
+
+opt_federov_results <- cbind(ds.red, 1/(1+exp(-predict.glm(combined_model, ds.red))))
+opt_federov_results
