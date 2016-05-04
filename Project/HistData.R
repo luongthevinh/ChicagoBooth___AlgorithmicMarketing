@@ -566,3 +566,176 @@ eval.design(~V1+V2+V3+V4+V5+V6+V7+V8+V9,ds.red)
 # experiments that doesn't have certain messages). Nonetheless, Eric's approach to test on the combined data
 # is fine by the moment
 
+# Experiment 1
+# Based on variability of the barplot
+# V1: levels 4,6
+# V2: levels 3,6
+# V3: levels 2,3
+# V4: levels  2,3
+# V5: levels 0
+# V6: levels 2,3 (maybe 6 from exp 88)
+# V7: levels 0
+# V8: levels 2,4
+# V9: levels 4,5,6 
+
+# Re-run the above experiment but substracting level 4
+# Test with 2 levels for var 3
+red.mat3 = gen.factorial(
+  levels=c(2,2,2,2,2,2,3),
+  varNames=c("V1","V2","V3","V4","V6","V8","V9"),
+  factors="all"
+)
+dim(red.mat3)
+ds.red = optFederov( ~ V1+V2+V3+V4+V6+V8+V9,data = red.mat3, nTrials = 36,criterion="I")$design
+
+# Design evaluation 27.4% variation
+eval.design(~V1+V2+V3+V4+V6+V8+V9,ds.red)
+
+# Rename levels before predict
+levels(ds.red$V1) <- c(4,6)
+levels(ds.red$V2) <- c(3,6)
+levels(ds.red$V3) <- c(2,3)
+levels(ds.red$V4) <- c(2,3)
+levels(ds.red$V6) <- c(2,3)
+levels(ds.red$V8) <- c(2,4)
+levels(ds.red$V9) <- c(4,5,6)
+ds.red
+
+# Evaluating the model
+# Add variable V5 and V2 for level 2
+ds.red['V5'] <- factor(2)
+ds.red['V7'] <- factor(2)
+ds.red
+
+# Predicting
+opt_federov_results <- cbind(ds.red, 1/(1+exp(-predict.glm(combined_model, ds.red))))
+opt_federov_results
+colnames(opt_federov_results)[10]<- c("ctr")
+
+
+# Preparing the matrix
+ds1 <- opt_federov_results[,1:9]
+ds1
+ds1['V5']<-NULL
+ds1['V7']<-NULL
+
+# Now build a model with that subset
+mm.ds1 = model.matrix(~.,ds1)
+dim(mm.ds1)
+mm.ds1
+
+# Load the ctr
+y.ds1 = opt_federov_results[,10]
+y.ds1
+
+# # cbind(y.ds1,N-y.ds1) = Success, No Success
+# sm.ds1 = summary(glm(cbind(y.ds1,1-y.ds1)~mm.ds1-1,family='binomial'))
+# sm.ds1
+# # Alternative way to do it
+# sm.ds1.b = summary(glm(log(y.ds1/(1-y.ds1))~mm.ds1-1))
+# sm.ds1.b
+Beta.ds <- coef(glm(log(y.ds1/(1-y.ds1))~mm.ds1-1))
+Odds.ds <- exp(Beta.ds); Odds.ds
+p.hat <- 1/(1+exp(-(Beta.ds["mm.ds1(Intercept)"]+Beta.ds["mm.ds1V26"]+Beta.ds["mm.ds1V33"]+Beta.ds["mm.ds1V63"]+Beta.ds["mm.ds1V84"]))); p.hat
+# Best message get 10.2% 
+
+# Not need to be run: Only to see the best message without variables 5 and 7
+# # Using predictive over models without V5 and V7
+# ## Running regression on experiments that include all 9 variables
+# ## Find the experiments that include all 9 variables
+# indices = numeric()
+# j = 1
+# for(i in 1:length(histdat)) {
+#   dat = histdat[[i]]
+#   if(!is.null(dat$V1) & !is.null(dat$V2) & !is.null(dat$V3) & !is.null(dat$V4) & is.null(dat$V5)  & !is.null(dat$V6) & is.null(dat$V7) & !is.null(dat$V8) & !is.null(dat$V9)){
+#     indices[j] = i
+#     j = j+1
+#   }
+# }
+
+# ##Combine the data from those experiments into the combined_dat matrix
+# j=1
+# combined_dat <- histdat[[indices[1]]]
+# for(i in indices) {
+#   num_campaigns = length(histdat[[i]]$V1)-1
+#   combined_dat[j:(j+num_campaigns),] <- histdat[[i]]
+#   j = j+num_campaigns
+# }
+# #Run the regression on the combined data
+# combined_model<-glm(cbind(Unique_Clicks,(Unique_Sent-Unique_Clicks))~.-1,data=combined_dat,family='binomial')
+# summary(combined_model)
+# 
+# #7.6% in the case with experiments with only 
+# Beta.ds <- coef(glm(log(y.ds1/(1-y.ds1))~mm.ds1-1))
+# Odds.ds <- exp(Beta.ds); Odds.ds
+# p.hat <- 1/(1+exp(-(Beta.ds["mm.ds1(Intercept)"]+Beta.ds["mm.ds1V33"]+Beta.ds["mm.ds1V84"]))); p.hat
+
+
+# Experiment 2
+# Based on variability of the barplot
+# V1: levels 4,6
+# V2: levels 3,6
+# V3: levels 2,3
+# V4: levels  2,3
+# V5: levels 2,5
+# V6: levels 2,3 (maybe 6 from exp 88)
+# V7: levels 1,2
+# V8: levels 2,4
+# V9: levels 4,5,6 
+
+# Re-run the above experiment but substracting level 4
+# Test with 2 levels for var 3
+red.mat4 = gen.factorial(
+  levels=c(2,2,2,2,2,2,2,2,3),
+  varNames=c("V1","V2","V3","V4","V5","V6","V7","V8","V9"),
+  factors="all"
+)
+dim(red.mat4)
+ds.red = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = red.mat4, nTrials = 36,criterion="I")$design
+
+# Design evaluation 27.4% variation
+eval.design(~V1+V2+V3+V4+V6+V8+V9,ds.red)
+
+# Rename levels before predict
+levels(ds.red$V1) <- c(4,6)
+levels(ds.red$V2) <- c(3,6)
+levels(ds.red$V3) <- c(2,3)
+levels(ds.red$V4) <- c(2,3)
+levels(ds.red$V5) <- c(2,5)
+levels(ds.red$V6) <- c(2,3)
+levels(ds.red$V7) <- c(1,2)
+levels(ds.red$V8) <- c(2,4)
+levels(ds.red$V9) <- c(4,5,6)
+ds.red
+
+# Evaluating the model
+# Predicting
+opt_federov_results <- cbind(ds.red, 1/(1+exp(-predict.glm(combined_model, ds.red))))
+opt_federov_results
+colnames(opt_federov_results)[10]<- c("ctr")
+
+
+# Preparing the matrix
+ds1 <- opt_federov_results[,1:9]
+ds1
+
+
+# Now build a model with that subset
+mm.ds1 = model.matrix(~.,ds1)
+dim(mm.ds1)
+mm.ds1
+
+# Load the ctr
+y.ds1 = opt_federov_results[,10]
+y.ds1
+
+# # cbind(y.ds1,N-y.ds1) = Success, No Success
+# sm.ds1 = summary(glm(cbind(y.ds1,1-y.ds1)~mm.ds1-1,family='binomial'))
+# sm.ds1
+# # Alternative way to do it
+# sm.ds1.b = summary(glm(log(y.ds1/(1-y.ds1))~mm.ds1-1))
+# sm.ds1.b
+Beta.ds <- coef(glm(log(y.ds1/(1-y.ds1))~mm.ds1-1))
+Odds.ds <- exp(Beta.ds); Odds.ds
+p.hat <- 1/(1+exp(-(Beta.ds["mm.ds1(Intercept)"]+Beta.ds["mm.ds1V26"]+Beta.ds["mm.ds1V33"]+Beta.ds["mm.ds1V55"]+Beta.ds["mm.ds1V63"]+Beta.ds["mm.ds1V72"]+Beta.ds["mm.ds1V84"]))); p.hat
+# Best message get 15.76% 
