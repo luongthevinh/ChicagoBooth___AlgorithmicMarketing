@@ -425,6 +425,9 @@ colnames(opt_federov_results)[10]<- c("ctr")
 # Explanation
 # The best message is the one with higher odds
 
+#-----------Julio's model versus All model--------#
+
+#---------------Julio's---------------------------#
 # Preparing the matrix
 ds1 <- opt_federov_results[,1:9]
 ds1
@@ -456,4 +459,23 @@ model.ds<-glm(cbind(ctr,(1-ctr))~.-1,data=opt_federov_results,family='binomial')
 Beta.ds<- coef(model.ds)
 Odds.ds <- exp(Beta.ds)
 
+#-----Never run for computer cap constraint---#
+#---------------All---------------------------#
+# Can we find set of messages to test?
+dim(mat)
+set.seed(61113)
+ds = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = mat, nTrials = 36,criterion="I") # If you change the number of variables, you need more datapoints (n of trials)
+ds
+ds1 = ds$design
 
+# Pretend we ran the experiment
+# Find those messages in our data
+y.ds1 = combined_dat[as.numeric(rownames(ds1))]
+y.ds1
+# Now build a model with that subset
+mm.ds1 = model.matrix(~.,ds1)
+dim(mm.ds1)
+
+# cbind(y.ds1,N-y.ds1) = Success, No Success
+sm.ds1 = summary(glm(cbind(y.ds1,N-y.ds1)~mm.ds1-1,family='binomial'))
+sm.ds1
