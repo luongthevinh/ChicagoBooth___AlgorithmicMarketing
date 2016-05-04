@@ -66,6 +66,9 @@ profit(5000000*.03,0,0)
 
 N <- 5000000
 
+###################################################
+#------------Exploratory            approach------#
+###################################################
 # Experiment one
 histdat[[1]]
 summary(histdat[[1]])
@@ -305,7 +308,8 @@ cbind(mat[combined_results>.159,],combined_results[combined_results>.159])
 #Find the best 36 values to test based on the OptFederov function.  Temporarily commented out as the function takes a long time to run
 #ds1 = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = mat, nTrials = 36,criterion="I")$design
 opt_federov_results <- cbind(ds1, 1/(1+exp(-predict.glm(combined_model, ds1))))
-
+# Design evaluation XX% variation
+eval.design(~V1+V2+V3+V4+V5+V6+V7+V8+V9,ds1)
 
 #-------------Julio's analysis of Eric's results-----------#
 Beta <- coef(combined_model)
@@ -402,6 +406,10 @@ red.mat2 = gen.factorial(
 )
 dim(red.mat2)
 ds.red = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = red.mat2, nTrials = 36,criterion="I")$design
+
+# Design evaluation 19.5% variation
+eval.design(~V1+V2+V3+V4+V5+V6+V7+V8+V9,ds.red)
+
 # The result needs to be translated into the keys above
 # For example V1 is from 1 to 3, but should be 3,4,6
 levels(ds.red$V1) <- c(3,4,6)
@@ -479,3 +487,70 @@ dim(mm.ds1)
 # cbind(y.ds1,N-y.ds1) = Success, No Success
 sm.ds1 = summary(glm(cbind(y.ds1,N-y.ds1)~mm.ds1-1,family='binomial'))
 sm.ds1
+
+###################################################
+#------------Exploratory professors approach------#
+###################################################
+
+cf1 = NULL
+ctr = NULL
+for (l in 1:318){
+  dat = histdat[[l]]
+  if("V1" %in% names(dat)){
+    res = glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~V1,data=dat,family="binomial")
+    cf1 = rbind(cf1, coef(res))
+  }
+  ctr = c(ctr,mean(dat$Unique_Clicks/dat$Unique_Sent))
+}
+summary(cf1)
+dim(cf1)
+colMeans(cf1)
+hist(ctr, breaks=50)
+# Only 150 datapoints to get the estimates
+0.03*5000
+
+# Function to spit out coefficients
+get.cf = function(dat){
+  gres = glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~.,data=dat,family="binomial")
+  coef(gres)
+  
+}
+
+# Apply Function to List (Same as "Beta" in Julios model)
+cf = lapply(histdat,get.cf)
+cf
+
+# Whats the full model?
+cfmax = cf[[which.max(sapply(cf,length))]]
+
+# Variable Names (same as getting levels in Julios: "Max.level.V9")
+nms = names(cfmax)
+nms
+
+
+# Storage
+cfmat = matrix(0,318,length(nms))
+# Loop across names
+for (j in 1:length(nms)){
+  vname = nms[j]
+  # Loop across experiments
+  for (l in 1:318){
+    cfmat[l,j] = NA
+    if (vname %in% names(cf[[l]])){
+      cfmat[l,j] = cf[[l]][which(vname==names(cf[[l]]))]
+    }
+  }
+}
+cfmat
+
+# Peek
+barplot(v.means[2:6])
+barplot(v.means[c("V32","V33")])
+barplot(cfmat[,c("V92","V93","V94","V95","V96")])
+
+# Evaluating your design
+dsr = sample(1:nrow(mat),36)
+ds.rand1 = mat[dsr,]
+eval.design(~V1+V2+V3+V4+V5+V6+V7+V8+V9,ds.rand1)
+eval.design(~V1+V2+V3+V4+V5+V6+V7+V8+V9,ds$design)
+
