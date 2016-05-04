@@ -541,12 +541,20 @@ for (j in 1:length(nms)){
     }
   }
 }
-cfmat
+
+# Rename cols
+colnames(cfmat) = nms
 
 # Peek
+v.means = colMeans(cfmat,na.rm=TRUE)
 barplot(v.means[2:6])
 barplot(v.means[c("V32","V33")])
+
+# Distribution of variables in the code
 barplot(cfmat[,c("V92","V93","V94","V95","V96")])
+
+dim(cfmat)
+length(nms)
 
 # Evaluating your design
 dsr = sample(1:nrow(mat),36)
