@@ -364,9 +364,9 @@ Odds[[174]]
 # V7: levels 2 (I added level 1 for federov to work)
 # V8: levels 2,4,5 
 # V9: levels 2,4,5 (maybe 3 and 6 from exp 87 and 144)
-3*4*3*1*4*1*1*3*3
-1296/8
-
+3*5*3*2*4*2*1*3*3
+6480/8
+36/(6480/8)
 # Factorial design
 # Reduced Factorial Design
 # This is an approximation of the optimal design because I needed to reduce the levels.
@@ -393,7 +393,7 @@ ds.red
 opt_federov_results <- cbind(ds.red, 1/(1+exp(-predict.glm(combined_model, ds.red))))
 
 
-# Test with 2 levels for var 7
+# Test with 2 levels for var 3
 red.mat2 = gen.factorial(
   levels=c(3,5,2,2,4,2,2,3,3),
   varNames=paste("V",1:9,sep=""),
