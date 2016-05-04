@@ -270,3 +270,36 @@ summary(ctr2)
 # These give you the same result
 all.equal(ctr,ctr2)
 
+
+## ------------Eric's attempt at reg model-----------------------
+## Running regression on experiments that include all 9 variables
+## Find the experiments that include all 9 variables
+indices = numeric()
+j = 1
+for(i in 1:length(histdat)) {
+  dat = histdat[[i]]
+  if(!is.null(dat$V1) & !is.null(dat$V2) & !is.null(dat$V3) & !is.null(dat$V4) & !is.null(dat$V5)  & !is.null(dat$V6) & !is.null(dat$V7) & !is.null(dat$V8) & !is.null(dat$V9)){
+    indices[j] = i
+    j = j+1
+  }
+}
+##Combine the data from those experiments into the combined_dat matrix
+j=1
+combined_dat <- histdat[[indices[1]]]
+for(i in indices) {
+  num_campaigns = length(histdat[[i]]$V1)-1
+  combined_dat[j:(j+num_campaigns),] <- histdat[[i]]
+  j = j+num_campaigns
+}
+#Run the regression on the combined data
+combined_model<-glm(cbind(Unique_Clicks,(Unique_Sent-Unique_Clicks))~.-1,data=combined_dat,family='binomial')
+summary(combined_model)
+
+#Calculate the predicted CTR
+combined_results <- 1/(1+exp(-predict.glm(combined_model, mat)))
+#Show the top 10 (a little bit of a hack here, getting the top 10 by taking the CTR rates that are above .159)
+cbind(mat[combined_results>.159,],combined_results[combined_results>.159])
+
+#Find the best 36 values to test based on the OptFederov function.  Temporarily commented out as the function takes a long time to run
+#ds1 = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = mat, nTrials = 36,criterion="I")$design
+opt_federov_results <- cbind(ds1, 1/(1+exp(-predict.glm(combined_model, ds1))))
