@@ -197,6 +197,10 @@ summary(mean.sent)
 colnames(histdat[[10]])
 histdat[[10]]
 
+###################################################
+#-------Building a naive model with all data------#
+###################################################
+
 # Run library
 library(AlgDesign)
 
@@ -251,14 +255,17 @@ mat = gen.factorial(
 dim(mat)
 
 
-# Can we find set of messages to test?
-# set.seed(61113)
-# ds = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = mat, nTrials = 36,criterion="I") # If you change the number of variables, you need more datapoints (n of trials)
-# ds
-# ds1 = ds$design
+# Finding the messages to test
+set.seed(61113)
+ds = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = mat, nTrials = 36,criterion="I") # If you change the number of variables, you need more datapoints (n of trials)
+ds
+ds1 = ds$design
+
+# Evaluating the model #determinant 12.6%
+eval.design(~V1+V2+V3+V4+V5+V6+V7+V8+V9,ds1)
 
 
-
+## ------------Professor Appendix-----------------------
 # Professors Code
 # Loop across the datasets
 ctr = NULL
@@ -327,6 +334,10 @@ print(Odds>1.2)
 # level 5 for 5
 # level 6 for 2
 
+
+###################################################
+#-------Building a better model             ------#
+###################################################
 #-------------Julio regression for every model-----------#
 #Run the regression on the model
 model <- list()
@@ -337,6 +348,7 @@ for(i in 1:length(histdat)){
   Beta[[i]]<- coef(model[[i]])
   Odds[[i]] <- exp(Beta[[i]])
 }
+# Example for experiment 1
 summary(model[[1]])
 Beta[[1]]
 Odds[[1]]
@@ -347,14 +359,7 @@ exp(Beta[[1]]["V13"])
 p.hat2 <- exp(Beta[[1]]["V12"])/(1+exp(Beta[[1]]["V12"])); p.hat2
 p.data2 <- histdat[[1]]$Unique_Clicks[1]/histdat[[1]]$"Unique_Sent"[1]; p.data2
 
-
-for(i in 1:length(histdat)){
-  Odds[[i]]
-}
-
-histdat[[174]]
-
-# Inspecting Odds
+# Inspecting all Odds to find visual patters (better to use professor's apporach at the end)
 Odds[[174]]
 
 # Julio's approch to create matrix
@@ -372,6 +377,7 @@ Odds[[174]]
 3*5*3*2*4*2*1*3*3
 6480/8
 36/(6480/8)
+
 # Factorial design
 # Reduced Factorial Design
 # This is an approximation of the optimal design because I needed to reduce the levels.
@@ -382,6 +388,9 @@ red.mat = gen.factorial(
 )
 dim(red.mat)
 ds.red = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = red.mat, nTrials = 36,criterion="I")$design
+# Design evaluation 19.13% variation: MUCH BETTER THAN BEFORE!
+eval.design(~V1+V2+V3+V4+V5+V6+V7+V8+V9,ds.red)
+
 # The result needs to be translated into the keys above
 # For example V1 is from 1 to 3, but should be 3,4,6
 levels(ds.red$V1) <- c(3,4,6)
@@ -395,9 +404,10 @@ levels(ds.red$V8) <- c(2,4,5)
 levels(ds.red$V9) <- c(2,4,5)
 ds.red
 
+# Predictions: FAILED because level 4 is missing for var 3
 opt_federov_results <- cbind(ds.red, 1/(1+exp(-predict.glm(combined_model, ds.red))))
 
-
+# Re-run the above experiment but substracting level 4
 # Test with 2 levels for var 3
 red.mat2 = gen.factorial(
   levels=c(3,5,2,2,4,2,2,3,3),
@@ -449,12 +459,12 @@ mm.ds1
 y.ds1 = opt_federov_results[,10]
 y.ds1
 
-# cbind(y.ds1,N-y.ds1) = Success, No Success
-sm.ds1 = summary(glm(cbind(y.ds1,1-y.ds1)~mm.ds1-1,family='binomial'))
-sm.ds1
-# Alternative way to do it
-sm.ds1.b = summary(glm(log(y.ds1/(1-y.ds1))~mm.ds1-1))
-sm.ds1.b
+# # cbind(y.ds1,N-y.ds1) = Success, No Success
+# sm.ds1 = summary(glm(cbind(y.ds1,1-y.ds1)~mm.ds1-1,family='binomial'))
+# sm.ds1
+# # Alternative way to do it
+# sm.ds1.b = summary(glm(log(y.ds1/(1-y.ds1))~mm.ds1-1))
+# sm.ds1.b
 Beta.ds <- coef(glm(log(y.ds1/(1-y.ds1))~mm.ds1-1))
 Odds.ds <- exp(Beta.ds); Odds.ds
 p.hat <- 1/(1+exp(-(Beta.ds["mm.ds1(Intercept)"]+Beta.ds["mm.ds1V14"]+Beta.ds["mm.ds1V26"]+Beta.ds["mm.ds1V33"]+Beta.ds["mm.ds1V55"]+Beta.ds["mm.ds1V63"]+Beta.ds["mm.ds1V72"]+Beta.ds["mm.ds1V84"]))); p.hat
@@ -467,26 +477,6 @@ model.ds<-glm(cbind(ctr,(1-ctr))~.-1,data=opt_federov_results,family='binomial')
 Beta.ds<- coef(model.ds)
 Odds.ds <- exp(Beta.ds)
 
-#-----Never run for computer cap constraint---#
-#---------------All---------------------------#
-# Can we find set of messages to test?
-dim(mat)
-set.seed(61113)
-ds = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = mat, nTrials = 36,criterion="I") # If you change the number of variables, you need more datapoints (n of trials)
-ds
-ds1 = ds$design
-
-# Pretend we ran the experiment
-# Find those messages in our data
-y.ds1 = combined_dat[as.numeric(rownames(ds1))]
-y.ds1
-# Now build a model with that subset
-mm.ds1 = model.matrix(~.,ds1)
-dim(mm.ds1)
-
-# cbind(y.ds1,N-y.ds1) = Success, No Success
-sm.ds1 = summary(glm(cbind(y.ds1,N-y.ds1)~mm.ds1-1,family='binomial'))
-sm.ds1
 
 ###################################################
 #------------Exploratory professors approach------#
@@ -552,6 +542,8 @@ barplot(v.means[c("V32","V33")])
 
 # Distribution of variables in the code
 barplot(cfmat[,c("V92","V93","V94","V95","V96")])
+# All variables distribution
+barplot(cfmat[,2:32])
 
 dim(cfmat)
 length(nms)
@@ -560,5 +552,17 @@ length(nms)
 dsr = sample(1:nrow(mat),36)
 ds.rand1 = mat[dsr,]
 eval.design(~V1+V2+V3+V4+V5+V6+V7+V8+V9,ds.rand1)
-eval.design(~V1+V2+V3+V4+V5+V6+V7+V8+V9,ds$design)
+eval.design(~V1+V2+V3+V4+V5+V6+V7+V8+V9,ds.red)
+
+####################################################
+#----------TEAM MODELS-----------------------------#
+####################################################
+
+# Jorge, Vinh, Shao, and Eric
+# Based on the data above you can create your models here an evaluate in term of:
+# 1. $determinant = means the variability that the ortogonal design is capturing
+# 2. ctr = of the best created model: you can use the odds approach (refer to p.hat)
+# 3. Variation on sample: we need to create a way to test our models in the complete database (including
+# experiments that doesn't have certain messages). Nonetheless, Eric's approach to test on the combined data
+# is fine by the moment
 
