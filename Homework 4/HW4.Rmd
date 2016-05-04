@@ -109,7 +109,7 @@ levels(all_combinations$symbol) <- paste('L', 1:2, sep='')
 Open probabilities:
 
 ```{r}
-open_probs <- predict(opens_model, newdata = all_combinations, response='prob')
+open_probs <- predict(opens_model, newdata = all_combinations, type='response')
 
 summary(open_probs)
 ```
@@ -120,15 +120,17 @@ The message with the highest predicted probability of being opened has the follo
 all_combinations[which.max(open_probs), ]
 ```
 
+Overall, however, the probability of a message being opened ranges extremely narrowly in the mid-50%s. We can practically say that a message has a 50-50 chance of being opened, no matter how it appears.
+
 Click probabilities:
 
 ```{r}
-click_probs <- predict(clicks_model, newdata = all_combinations, response = 'prob')
+click_probs <- predict(clicks_model, newdata = all_combinations, type='response')
 
 summary(click_probs)
 ```
 
-The message with the highest predicted probability of being clicked through has the following configuration:
+The click-through probabilities, unlike the open probabilities, have meaningful variation among them. The message with the highest predicted probability of being clicked through has the following configuration:
 
 ```{r}
 all_combinations[which.max(click_probs), ]
