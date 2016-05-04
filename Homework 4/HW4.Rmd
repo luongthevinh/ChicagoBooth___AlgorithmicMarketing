@@ -73,6 +73,13 @@ Odds1 <- exp(Beta1); Odds1
 
 Nonetheless the comments on the model made before, as appreciated in the result of the odds, all odds for the model are very close to 1, this means that the base probability of opening an email :__`r p.hat1`__ is almost not affected by the variations in the model.
 
+
+This is in line with the no variability shown in the table below for the open rate:
+```{r}
+summary(df$'unique_open'/df$'successful_sent')
+````
+
+
 Logit model for Clicks:
 
 ```{r}
