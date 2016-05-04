@@ -63,6 +63,15 @@ Some comments on this model:
 - __Main Text__: The second choice _"Check out our selection for you - add a new phone, tablet, or other device!"_ has a negative significant coefficient. This is perhaps because it is less informative than the first choice in terms of articulating the benefits;
 - __Action__: The second choice _"Click Here to..."_ is also negative and significant, suggesting a higher tendency for people to find that deceiving
 
+```{r}
+# Coefficients analysis
+Beta1 <- coef(opens_model)
+p.hat1 <- exp(Beta1["(Intercept)"])/(1+exp(Beta1["(Intercept)"]))
+p.data1 <- df$unique_opened[1]/df$"successful_sent"[1]
+Odds1 <- exp(Beta1); Odds1
+```
+
+Nonetheless the comments on the model made before, as appreciated in the result of the odds, all odds for the model are very close to 1, this means that the base probability of opening an email :__`r p.hat1`__ is almost not affected by the variations in the model.
 
 Logit model for Clicks:
 
@@ -80,6 +89,18 @@ There are some notable differences in this model vs. the one for Opens:
 
 - __Headline__: all options are statistically significantly different now, suggesting people do care about what the Headline says in deciding whether to follow through. The first option _"You'll Love It"_ seems to be the worst, suggesting a degree of distrust for such a claim;
 - __Action__: the second option _"Click Here to..."_ now has a positive significatn coefficient - so once people trust the content of the message, a prompt to click does lead to a higher tendency to click through.
+
+```{r}
+# Coefficients analysis
+Beta2 <- coef(clicks_model)
+p.hat2 <- exp(Beta2["(Intercept)"])/(1+exp(Beta2["(Intercept)"]))
+p.data2 <- df$unique_clicks[1]/df$"successful_sent"[1]
+Odds2 <- exp(Beta2); Odds2
+```
+
+In line with the comments made above, as appreciated in the result of the odds, some odds for certain variables of the model are very different from 1, this means that the base probability of clicking an email :__`r p.hat2`__ is affected by the variations. 
+
+For example, introL3 increases the odds by __`r Odds2['introL3']`__. Other important variables are headlineL2, headlineL3, and actionL2.
 
 
 # Q3: Use the estimated models to compute predicted probabilities for all possible message combinations (separate predictions for opens and clicks). Which messages have the highes fitted response probabilities? Are the two messages similar or different? Discuss.
