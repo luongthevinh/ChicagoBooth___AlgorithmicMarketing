@@ -318,3 +318,17 @@ print(Odds>1.2)
 # level 2 for 7
 # level 5 for 5
 # level 6 for 2
+
+#-------------Julio regression for every model-----------#
+#Run the regression on the model
+model <- list()
+Beta <- list()
+Odds <- list()
+for(i in 1:length(histdat)){
+  model[[i]]<-glm(cbind(Unique_Clicks,(Unique_Sent-Unique_Clicks))~.-1,data=histdat[[i]],family='binomial')
+  Beta[[i]] <- coef(model[[i]])
+  Odds[[i]] <- exp(Beta[[i]])
+}
+summary(model[[1]])
+Beta[[1]]
+Odds[[1]]
