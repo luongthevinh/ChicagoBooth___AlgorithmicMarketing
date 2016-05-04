@@ -8,6 +8,7 @@ load(file = "Historical_Data.rdat")
 # Loads a list calles histdat
 # The list contains 318 elements
 length(histdat)
+
 # Each element is a matrix that gives you the results on an experiment that was run.
 # For example the 11th element is a experiment with 48 messages
 # The first set of variables (named V1,V2, etc.) correspond to message elements
@@ -166,7 +167,7 @@ for (i in 1:length(histdat)){
 design.list <- list()
 j=1
 for (i in 1:length(histdat)){
-  if (profit.all[[i]]>40000){
+  if (profit.all[[i]]>35000){
     cat("Experiment",i,"N of campaigns","= ",dim(histdat[[i]])[1],"Profits:",profit.all[[i]],"\n")
     design.list[j]<-i
     j <- j+1
@@ -191,7 +192,7 @@ mean.sent = sapply(hist.sub,function(dt) { mean(dt$Unique_Sent) })
 summary(mean.sent)
 
 colnames(histdat[[10]])
-histdat[[1]]
+histdat[[10]]
 
 # Run library
 library(AlgDesign)
@@ -245,6 +246,7 @@ mat = gen.factorial(
   factors="all"
 )
 dim(mat)
+
 
 # Can we find set of messages to test?
 # set.seed(61113)
@@ -344,8 +346,11 @@ p.data2 <- histdat[[1]]$Unique_Clicks[1]/histdat[[1]]$"Unique_Sent"[1]; p.data2
 for(i in 1:length(histdat)){
   Odds[[i]]
 }
-Odds[[174]]
+
 histdat[[174]]
+
+# Inspecting Odds
+Odds[[174]]
 
 # Julio's approch to create matrix
 # Let's take the variable/levels that generate the most variability to later create a subset of the
@@ -360,6 +365,7 @@ histdat[[174]]
 # V8: levels 2,4,5 
 # V9: levels 2,4,5 (maybe 3 and 6 from exp 87 and 144)
 3*4*3*1*4*1*1*3*3
+1296/8
 
 # Factorial design
 # Reduced Factorial Design
@@ -386,14 +392,14 @@ ds.red
 opt_federov_results <- cbind(ds.red, 1/(1+exp(-predict.glm(combined_model, ds.red))))
 
 
-# Test with 2 levels for var 3
-red.mat = gen.factorial(
+# Test with 2 levels for var 7
+red.mat2 = gen.factorial(
   levels=c(3,5,2,2,4,2,2,3,3),
   varNames=paste("V",1:9,sep=""),
   factors="all"
 )
-dim(red.mat)
-ds.red = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = red.mat, nTrials = 36,criterion="I")$design
+dim(red.mat2)
+ds.red = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = red.mat2, nTrials = 36,criterion="I")$design
 # The result needs to be translated into the keys above
 # For example V1 is from 1 to 3, but should be 3,4,6
 levels(ds.red$V1) <- c(3,4,6)
