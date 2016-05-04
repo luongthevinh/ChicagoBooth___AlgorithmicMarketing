@@ -340,8 +340,9 @@ Odds[[1]]
 # Checking that odds and probabilities are accurate
 Beta[[1]]["V13"]
 exp(Beta[[1]]["V13"])
-p.hat2 <- Beta[[1]]["V11"]/(1+Beta[[1]]["V11"]); p.hat2
+p.hat2 <- exp(Beta[[1]]["V12"])/(1+exp(Beta[[1]]["V12"])); p.hat2
 p.data2 <- histdat[[1]]$Unique_Clicks[1]/histdat[[1]]$"Unique_Sent"[1]; p.data2
+
 
 for(i in 1:length(histdat)){
   Odds[[i]]
@@ -416,3 +417,43 @@ ds.red
 
 opt_federov_results <- cbind(ds.red, 1/(1+exp(-predict.glm(combined_model, ds.red))))
 opt_federov_results
+colnames(opt_federov_results)[10]<- c("ctr")
+
+###################################################
+#------------Finding the best message----------#
+###################################################
+# Explanation
+# The best message is the one with higher odds
+
+# Preparing the matrix
+ds1 <- opt_federov_results[,1:9]
+ds1
+
+# Now build a model with that subset
+mm.ds1 = model.matrix(~.,ds1)
+dim(mm.ds1)
+mm.ds1
+
+# Find those messages in our data
+y.ds1 = opt_federov_results[,10]
+y.ds1
+
+# cbind(y.ds1,N-y.ds1) = Success, No Success
+sm.ds1 = summary(glm(cbind(y.ds1,1-y.ds1)~mm.ds1-1,family='binomial'))
+sm.ds1
+# Alternative way to do it
+sm.ds1.b = summary(glm(log(y.ds1/(1-y.ds1))~mm.ds1-1))
+sm.ds1.b
+Beta.ds <- coef(glm(log(y.ds1/(1-y.ds1))~mm.ds1-1))
+Odds.ds <- exp(Beta.ds); Odds.ds
+p.hat <- 1/(1+exp(-(Beta.ds["mm.ds1(Intercept)"]+Beta.ds["mm.ds1V14"]+Beta.ds["mm.ds1V26"]+Beta.ds["mm.ds1V33"]+Beta.ds["mm.ds1V55"]+Beta.ds["mm.ds1V63"]+Beta.ds["mm.ds1V72"]+Beta.ds["mm.ds1V84"]))); p.hat
+# Best message get 17.65%
+
+#--------------- Best way to do it--------------#
+# Warning: Not running
+# Correct to run the regression get the odds and calculate the CTR for the best message to be sent
+model.ds<-glm(cbind(ctr,(1-ctr))~.-1,data=opt_federov_results,family='binomial')
+Beta.ds<- coef(model.ds)
+Odds.ds <- exp(Beta.ds)
+
+
