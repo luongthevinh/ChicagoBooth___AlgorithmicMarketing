@@ -309,6 +309,8 @@ opt_federov_results <- cbind(ds1, 1/(1+exp(-predict.glm(combined_model, ds1))))
 Beta <- coef(combined_model)
 Odds <- exp(Beta); Odds
 # Variable/level that extremely reduce the odds and needs not to be in the model "TRUE"
+# Be careful that V1 is used as based level so it doesnt matter that the odds are lower for that case
+# We will include the biggest odds of it (V13 or V14)
 print(Odds<0.7)
 # Variable/level that needs to be included "TRUE"
 print(Odds>1.2)
@@ -326,9 +328,19 @@ Beta <- list()
 Odds <- list()
 for(i in 1:length(histdat)){
   model[[i]]<-glm(cbind(Unique_Clicks,(Unique_Sent-Unique_Clicks))~.-1,data=histdat[[i]],family='binomial')
-  Beta[[i]] <- coef(model[[i]])
+  Beta[[i]]<- coef(model[[i]])
   Odds[[i]] <- exp(Beta[[i]])
 }
 summary(model[[1]])
 Beta[[1]]
-Odds[[1]]
+Odds[[10]]
+
+# Checking that odds and probabilities are accurate
+Beta[[1]]["V13"]
+exp(Beta[[1]]["V13"])
+p.hat2 <- Beta[[1]]["V11"]/(1+Beta[[1]]["V11"]); p.hat2
+p.data2 <- histdat[[1]]$Unique_Clicks[1]/histdat[[1]]$"Unique_Sent"[1]; p.data2
+
+for(i in 1:length(histdat)){
+  Odds[[i]]
+}
