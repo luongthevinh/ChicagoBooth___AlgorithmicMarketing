@@ -40,8 +40,99 @@ The number of possible combinations is __`r intro * headline * main_text * butto
 
 # Q2: Estimate two logit models based on the data (assuming a simple linear specification) - one for opens and another for clicks. Discuss your results based on the nature of the variables (see variable names and descriptions tab).
 
+```{r}
+df <- df[1:16, 4:14]
+df$successful_sent = df$unique_sent - df$bounced
+```
+
+Logit model for Opens:
+
+```{r}
+opens_model <-
+  glm(cbind(unique_opened, successful_sent - unique_opened) ~ 
+        intro + headline + main_text + button + action + purpose + symbol,
+      data = df,
+      family = 'binomial')
+
+summary(opens_model)
+```
+
+Some comments on this model:
+
+- __Headline__: All options are not statistically different, suggesting the Headline does not reallyt matter to the probabilility of people opening the message;
+- __Main Text__: The second choice _"Check out our selection for you - add a new phone, tablet, or other device!"_ has a negative significant coefficient. This is perhaps because it is less informative than the first choice in terms of articulating the benefits;
+- __Action__: The second choice _"Click Here to..."_ is also negative and significant, suggesting a higher tendency for people to find that deceiving
+
+
+Logit model for Clicks:
+
+```{r}
+clicks_model <-
+  glm(cbind(unique_clicks, successful_sent - unique_clicks) ~
+        intro + headline + main_text + button + action + purpose + symbol,
+      data = df,
+      family = 'binomial')
+
+summary(clicks_model)
+```
+
+There are some notable differences in this model vs. the one for Opens:
+
+- __Headline__: all options are statistically significantly different now, suggesting people do care about what the Headline says in deciding whether to follow through. The first option _"You'll Love It"_ seems to be the worst, suggesting a degree of distrust for such a claim;
+- __Action__: the second option _"Click Here to..."_ now has a positive significatn coefficient - so once people trust the content of the message, a prompt to click does lead to a higher tendency to click through.
+
 
 # Q3: Use the estimated models to compute predicted probabilities for all possible message combinations (separate predictions for opens and clicks). Which messages have the highes fitted response probabilities? Are the two messages similar or different? Discuss.
+
+```{r}
+all_combinations <-
+  gen.factorial(
+    levels = c(4, 4, 2, 2, 2, 4, 2),
+    factors = 'all',
+    varNames = c('intro',
+                 'headline',
+                 'main_text',
+                 'button',
+                 'action',
+                 'purpose',
+                 'symbol'))
+
+levels(all_combinations$intro) <- paste('L', 1:4, sep='')
+levels(all_combinations$headline) <- paste('L', 1:4, sep='')
+levels(all_combinations$main_text) <- paste('L', 1:2, sep='')
+levels(all_combinations$button) <- paste('L', 1:2, sep='')
+levels(all_combinations$action) <- paste('L', 1:2, sep='')
+levels(all_combinations$purpose) <- paste('L', 1:4, sep='')
+levels(all_combinations$symbol) <- paste('L', 1:2, sep='')
+```
+
+Open probabilities:
+
+```{r}
+open_probs <- predict(opens_model, newdata = all_combinations, response='prob')
+
+summary(open_probs)
+```
+
+The message with the highest predicted probability of being opened has the following configuration:
+
+```{r}
+all_combinations[which.max(open_probs), ]
+```
+
+Click probabilities:
+
+```{r}
+click_probs <- predict(clicks_model, newdata = all_combinations, response = 'prob')
+
+summary(click_probs)
+```
+
+The message with the highest predicted probability of being clicked through has the following configuration:
+
+```{r}
+all_combinations[which.max(click_probs), ]
+```
 
 
 # Q4: Please use the historical data provided in the project section of chalk to provide me your experimental design. See HistData.R for details.
