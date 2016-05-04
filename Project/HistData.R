@@ -369,6 +369,7 @@ Odds[[174]]
 
 # Factorial design
 # Reduced Factorial Design
+# This is an approximation of the optimal design because I needed to reduce the levels.
 red.mat = gen.factorial(
   levels=c(3,5,3,2,4,2,2,3,3),
   varNames=paste("V",1:9,sep=""),
