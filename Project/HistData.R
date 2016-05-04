@@ -303,3 +303,18 @@ cbind(mat[combined_results>.159,],combined_results[combined_results>.159])
 #Find the best 36 values to test based on the OptFederov function.  Temporarily commented out as the function takes a long time to run
 #ds1 = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = mat, nTrials = 36,criterion="I")$design
 opt_federov_results <- cbind(ds1, 1/(1+exp(-predict.glm(combined_model, ds1))))
+
+
+#-------------Julio's analysis of Eric's results-----------#
+Beta <- coef(combined_model)
+Odds <- exp(Beta); Odds
+# Variable/level that extremely reduce the odds and needs not to be in the model "TRUE"
+print(Odds<0.7)
+# Variable/level that needs to be included "TRUE"
+print(Odds>1.2)
+# V26, V55, V72, V92, V94
+
+# Eric's messages match with the analysis of level 2 and 4 for variable 9
+# level 2 for 7
+# level 5 for 5
+# level 6 for 2
