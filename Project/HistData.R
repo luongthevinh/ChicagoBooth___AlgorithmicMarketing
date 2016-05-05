@@ -521,29 +521,33 @@ nms
 # Storage
 cfmat = matrix(0,318,length(nms))
 # Loop across names
-for (j in 1:length(nms)){
+for(j in 1:length(nms))
+{
   vname = nms[j]
   # Loop across experiments
-  for (l in 1:318){
+  for(l in 1:318)
+  {
     cfmat[l,j] = NA
-    if (vname %in% names(cf[[l]])){
+    # Find experiments which have variable
+    # and store estiamte
+    if(vname %in% names(cf[[l]])) {
       cfmat[l,j] = cf[[l]][which(vname==names(cf[[l]]))]
     }
   }
 }
 
-# Rename cols
+# Rename Cols
 colnames(cfmat) = nms
+# Average ignoring missing
+v.means = colMeans(cfmat,na.rm=TRUE)
 
 # Peek
-v.means = colMeans(cfmat,na.rm=TRUE)
 barplot(v.means[2:6])
 barplot(v.means[c("V32","V33")])
+boxplot(cfmat[,c("V92","V93","V94","V95","V96")])
 
-# Distribution of variables in the code
-barplot(cfmat[,c("V92","V93","V94","V95","V96")])
 # All variables distribution
-barplot(cfmat[,2:32])
+boxplot(cfmat[,2:32])
 
 dim(cfmat)
 length(nms)
