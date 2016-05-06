@@ -45,7 +45,7 @@ histdat[[200]]
 # The number of emails doesnt impact your cost (apart from the opportunity cost).
 
 # Your total project profitability will be calculated as follows
-
+N <- 5000000
 profit = function(unique_clicks,ncampaigns,other)
 {
 	unique_clicks*.1 - 200*ncampaigns - other
@@ -64,7 +64,7 @@ profit(5000000*.1,96,5000)
 profit(5000000*.03,0,0)
 # $15,000
 
-N <- 5000000
+
 
 ###################################################
 #------------Exploratory            approach------#
@@ -367,57 +367,28 @@ Odds[[174]]
 # mat. On that 'mat' we use the Russian formula
 # V1: levels 3,4,6
 # V2: levels 2,3,4,5,6
-# V3: levels 2,3,4
+# V3: levels 2,3
 # V4: levels  1,2
 # V5: levels 2,3,4,5
 # V6: levels 2,3 (maybe 6 from exp 88)
 # V7: levels 2 (I added level 1 for federov to work)
 # V8: levels 2,4,5 
 # V9: levels 2,4,5 (maybe 3 and 6 from exp 87 and 144)
-3*5*3*2*4*2*1*3*3
-6480/8
-36/(6480/8)
+3*5*2*2*4*2*1*3*3
+3420/8
+36/(4320/8)
 
 # Factorial design
 # Reduced Factorial Design
 # This is an approximation of the optimal design because I needed to reduce the levels.
 red.mat = gen.factorial(
-  levels=c(3,5,3,2,4,2,2,3,3),
+  levels=c(3,5,2,2,4,2,2,3,3),
   varNames=paste("V",1:9,sep=""),
   factors="all"
 )
 dim(red.mat)
 ds.red = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = red.mat, nTrials = 36,criterion="I")$design
 # Design evaluation 19.13% variation: MUCH BETTER THAN BEFORE!
-eval.design(~V1+V2+V3+V4+V5+V6+V7+V8+V9,ds.red)
-
-# The result needs to be translated into the keys above
-# For example V1 is from 1 to 3, but should be 3,4,6
-levels(ds.red$V1) <- c(3,4,6)
-levels(ds.red$V2) <- c(2,3,4,5,6)
-levels(ds.red$V3) <- c(2,3,4)
-levels(ds.red$V4) <- c(1,2)
-levels(ds.red$V5) <- c(2,3,4,5)
-levels(ds.red$V6) <- c(2,3)
-levels(ds.red$V7) <- c(1,2)
-levels(ds.red$V8) <- c(2,4,5)
-levels(ds.red$V9) <- c(2,4,5)
-ds.red
-
-# Predictions: FAILED because level 4 is missing for var 3
-opt_federov_results <- cbind(ds.red, 1/(1+exp(-predict.glm(combined_model, ds.red))))
-
-# Re-run the above experiment but substracting level 4
-# Test with 2 levels for var 3
-red.mat2 = gen.factorial(
-  levels=c(3,5,2,2,4,2,2,3,3),
-  varNames=paste("V",1:9,sep=""),
-  factors="all"
-)
-dim(red.mat2)
-ds.red = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = red.mat2, nTrials = 36,criterion="I")$design
-
-# Design evaluation 19.5% variation
 eval.design(~V1+V2+V3+V4+V5+V6+V7+V8+V9,ds.red)
 
 # The result needs to be translated into the keys above
@@ -433,15 +404,20 @@ levels(ds.red$V8) <- c(2,4,5)
 levels(ds.red$V9) <- c(2,4,5)
 ds.red
 
+# Predictions
 opt_federov_results <- cbind(ds.red, 1/(1+exp(-predict.glm(combined_model, ds.red))))
 opt_federov_results
+# Rename column 10, so name is shorter
 colnames(opt_federov_results)[10]<- c("ctr")
 
 ###################################################
 #------------Finding the best message----------#
 ###################################################
 # Explanation
-# The best message is the one with higher odds
+# The best message is the one with higher odds to 
+# generate a high Click through rate (CTR) and
+# the determinant of the  Federov design is
+# high enough
 
 #-----------Julio's model versus All model--------#
 
@@ -471,11 +447,12 @@ p.hat <- 1/(1+exp(-(Beta.ds["mm.ds1(Intercept)"]+Beta.ds["mm.ds1V14"]+Beta.ds["m
 # Best message get 17.65%
 
 #--------------- Best way to do it--------------#
-# Warning: Not running
+# NOW IS RUNNING!
 # Correct to run the regression get the odds and calculate the CTR for the best message to be sent
-model.ds<-glm(cbind(ctr,(1-ctr))~.-1,data=opt_federov_results,family='binomial')
+model.ds<-glm(cbind(ctr,(1-ctr))~.,data=opt_federov_results,family='binomial')
 Beta.ds<- coef(model.ds)
 Odds.ds <- exp(Beta.ds)
+p.hat <- 1/(1+exp(-(Beta.ds["(Intercept)"]+Beta.ds["V14"]+Beta.ds["V26"]+Beta.ds["V33"]+Beta.ds["V55"]+Beta.ds["V63"]+Beta.ds["V72"]+Beta.ds["V84"]))); p.hat
 
 
 ###################################################
@@ -496,7 +473,9 @@ summary(cf1)
 dim(cf1)
 colMeans(cf1)
 hist(ctr, breaks=50)
-# Only 150 datapoints to get the estimates
+# boxplot(cfmat[,c("V92","V93","V94","V95","V96")])
+# If we sent 5,000 emails:
+# Only 150 datapoints to get the estimates, that should be fine
 0.03*5000
 
 # Function to spit out coefficients
@@ -508,15 +487,13 @@ get.cf = function(dat){
 
 # Apply Function to List (Same as "Beta" in Julios model)
 cf = lapply(histdat,get.cf)
-cf
+
 
 # Whats the full model?
 cfmax = cf[[which.max(sapply(cf,length))]]
 
 # Variable Names (same as getting levels in Julios: "Max.level.V9")
 nms = names(cfmax)
-nms
-
 
 # Storage
 cfmat = matrix(0,318,length(nms))
@@ -584,16 +561,16 @@ eval.design(~V1+V2+V3+V4+V5+V6+V7+V8+V9,ds.red)
 
 # Re-run the above experiment but substracting level 4
 # Test with 2 levels for var 3
-red.mat3 = gen.factorial(
+red.mat2 = gen.factorial(
   levels=c(2,2,2,2,2,2,3),
   varNames=c("V1","V2","V3","V4","V6","V8","V9"),
   factors="all"
 )
-dim(red.mat3)
-ds.red = optFederov( ~ V1+V2+V3+V4+V6+V8+V9,data = red.mat3, nTrials = 36,criterion="I")$design
+dim(red.mat2)
+ds2.red = optFederov( ~ V1+V2+V3+V4+V6+V8+V9,data = red.mat2, nTrials = 36,criterion="I")$design
 
 # Design evaluation 27.4% variation
-eval.design(~V1+V2+V3+V4+V6+V8+V9,ds.red)
+eval.design(~V1+V2+V3+V4+V6+V8+V9,ds.red2)
 
 # Rename levels before predict
 levels(ds.red$V1) <- c(4,6)
