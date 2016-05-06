@@ -668,12 +668,12 @@ p.hat <- 1/(1+exp(-(Beta.ds["mm.ds1(Intercept)"]+Beta.ds["mm.ds1V26"]+Beta.ds["m
 # V3: levels 2,3
 # V4: levels  2,3
 # V5: levels 2,5
-# V6: levels 2,3 (maybe 6 from exp 88)
+# V6: levels 2,3 
 # V7: levels 1,2
 # V8: levels 2,4
 # V9: levels 4,5,6 
 
-# Re-run the above experiment but substracting level 4
+# Same as above with variables 5 and 7
 # Test with 2 levels for var 3
 red.mat3 = gen.factorial(
   levels=c(2,2,2,2,2,2,2,2,3),
@@ -771,7 +771,7 @@ red.mat4 = gen.factorial(
 dim(red.mat4)
 ds4.red = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = red.mat4, nTrials = 36,criterion="I")$design
 
-# Design evaluation 20.1% variation
+# Design evaluation 25.7% variation
 eval.design(~V1+V2+V3+V4+V6+V8+V9,ds4.red)
 
 # Rename levels before predict
@@ -785,7 +785,10 @@ levels(ds4.red$V7) <- c(1,2)
 levels(ds4.red$V8) <- c(2,4)
 levels(ds4.red$V9) <- c(4,5,6)
 ds4.red
-
+final.design = ds4.red
+final.design$N <- 5000
+final.design
+write.csv(final.design, file="JGdesign.csv", row.names = FALSE)
 # Evaluating the model
 # Predicting
 opt_federov_results <- cbind(ds4.red, 1/(1+exp(-predict.glm(combined_model, ds4.red))))
@@ -844,21 +847,22 @@ p.hat <- 1/(1+exp(-(Beta.ds["V14"]+Beta.ds["V26"]+Beta.ds["V33"]+Beta.ds["V55"]+
 # V3: levels 2,3
 # V4: levels  1,2,3
 # V5: levels 2,5
-# V6: levels 2,3
+# V6: levels 2,3,4 
 # V7: levels 1,2
-# V8: levels 2,4
-# V9: levels 4,5,6 
+# V8: levels 2,4,5 
+# V9: levels 2,4,5,6 
 
-# NEW THING TO TRY: Fater this discovery try interactions
+# NEW THING TO TRY: V64 (because experiment 221 the paramenter is extremely high) and V85 because
+# of dispersion, and V92
 red.mat5 = gen.factorial(
-  levels=c(2,2,2,3,2,2,2,2,3),
+  levels=c(2,2,2,3,2,3,2,3,4),
   varNames=c("V1","V2","V3","V4","V5","V6","V7","V8","V9"),
   factors="all"
 )
 dim(red.mat5)
 ds5.red = optFederov( ~ V1+V2+V3+V4+V5+V6+V7+V8+V9,data = red.mat5, nTrials = 36,criterion="I")$design
 
-# Design evaluation 20.1% variation
+# Design evaluation 21.9% variation
 eval.design(~V1+V2+V3+V4+V6+V8+V9,ds5.red)
 
 # Rename levels before predict
@@ -867,10 +871,10 @@ levels(ds5.red$V2) <- c(3,6)
 levels(ds5.red$V3) <- c(2,3)
 levels(ds5.red$V4) <- c(1,2,3)
 levels(ds5.red$V5) <- c(2,5)
-levels(ds5.red$V6) <- c(2,3)
+levels(ds5.red$V6) <- c(2,3,4)
 levels(ds5.red$V7) <- c(1,2)
-levels(ds5.red$V8) <- c(2,4)
-levels(ds5.red$V9) <- c(4,5,6)
+levels(ds5.red$V8) <- c(2,4,5)
+levels(ds5.red$V9) <- c(2,4,5,6)
 ds5.red
 
 # Evaluating the model
@@ -884,9 +888,9 @@ model.ds<-glm(cbind(ctr,(1-ctr))~.-1,data=opt_federov_results,family='binomial')
 Beta.ds<- coef(model.ds)
 Odds.ds <- exp(Beta.ds); Odds.ds
 p.hat <- 1/(1+exp(-(Beta.ds["V14"]+Beta.ds["V26"]+Beta.ds["V33"]+Beta.ds["V55"]+Beta.ds["V63"]+Beta.ds["V72"]+Beta.ds["V84"]))); p.hat
-# ctr = 17.5% same as before
+# ctr = 17.7% slighly better than before
 
-# Best message get 17.5% 
+# Best message get 17.7% 
 
 
 
@@ -947,4 +951,29 @@ for(i in 1:length(histdat)) {
     j = j+1
   }
 }
+
+# Experiments without 7
+# There are 14 experiments, let's see the results in them
+indices = numeric()
+j = 1
+for(i in 1:length(histdat)) {
+  dat = histdat[[i]]
+  if(!is.null(dat$V1) & !is.null(dat$V2) & !is.null(dat$V3) & !is.null(dat$V4) & !is.null(dat$V5)  & !is.null(dat$V6) & is.null(dat$V7) & !is.null(dat$V8) & !is.null(dat$V9)){
+    indices[j] = i
+    j = j+1
+  }
+}
+# Results in those experiments
+# 41: 17%
+# 78: 30%
+# 83: 18.7%
+# 87: 45.5%
+# 121: 14.7%
+# 164: 26.4%
+# 228: 18.6%
+
+i <- 228
+Odds[[i]]
+Beta.l <- Beta[[i]]
+p.hat <- 1/(1+exp(-(Beta.l["V14"]+Beta.l["V26"]+Beta.l["V33"]+Beta.l["V55"]+Beta.l["V63"]+Beta.l["V84"]+Beta.l["V92"]))); p.hat
 
