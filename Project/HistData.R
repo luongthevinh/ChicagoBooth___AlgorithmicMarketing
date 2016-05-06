@@ -898,10 +898,13 @@ p.hat <- 1/(1+exp(-(Beta.ds["V14"]+Beta.ds["V26"]+Beta.ds["V33"]+Beta.ds["V55"]+
 # 174: 17.9% Again, 9 is not in the model
 # 221: 82.3% with 4, 5 and 7 out of the model (interesting)
 # 294: 31.14%
-i <- 65
+i <- 221
 Odds[[i]]
 Beta.l <- Beta[[i]]
-p.hat <- 1/(1+exp(-(Beta.l["V14"]+Beta.l["V26"]+Beta.l["V33"]+Beta.l["V42"]+Beta.l["V55"]+Beta.l["V72"]+Beta.l["V84"]+Beta.l["V93"]))); p.hat
+p.hat <- 1/(1+exp(-(Beta.l["V12"]+Beta.l["V26"]+Beta.l["V32"]+Beta.l["V64"]+Beta.l["V85"]))); p.hat
 histdat[[i]]
-model.ds<-glm(cbind(Unique_Clicks,(Unique_Sent-Unique_Clicks))~.-1,data=histdat[[i]],family='binomial')
+model.ds<-glm(cbind(Unique_Clicks,(Unique_Sent-Unique_Clicks))~.-1,data=combined_dat,family='binomial')
 summary(model.ds)
+Beta.ds<- coef(model.ds)
+p.hat <- 1/(1+exp(-(Beta.ds["V12"]+Beta.ds["V26"]+Beta.ds["V32"]+Beta.ds["V64"]+Beta.ds["V85"]))); p.hat
+# Only 18%
