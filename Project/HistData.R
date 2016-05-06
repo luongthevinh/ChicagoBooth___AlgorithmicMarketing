@@ -478,16 +478,21 @@ hist(ctr, breaks=50)
 # Only 150 datapoints to get the estimates, that should be fine
 0.03*5000
 
+
+#Run the regression on the combined data
+combined_model<-glm(cbind(Unique_Clicks,(Unique_Sent-Unique_Clicks))~.-1,data=combined_dat,family='binomial')
+summary(combined_model)
+
+
 # Function to spit out coefficients
 get.cf = function(dat){
   gres = glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~.,data=dat,family="binomial")
   coef(gres)
-  
 }
 
 # Apply Function to List (Same as "Beta" in Julios model)
 cf = lapply(histdat,get.cf)
-cf
+
 
 # Whats the full model?
 cfmax = cf[[which.max(sapply(cf,length))]]
@@ -898,6 +903,29 @@ p.hat <- 1/(1+exp(-(Beta.ds["V14"]+Beta.ds["V26"]+Beta.ds["V33"]+Beta.ds["V55"]+
 # 174: 17.9% Again, 9 is not in the model
 # 221: 82.3% with 4, 5 and 7 out of the model (interesting)
 # 294: 31.14%
+
+# Function to spit out coefficients
+get.cf2 = function(dat){
+  gres = glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~.*.,data=dat,family="binomial")
+  coef(gres)
+}
+
+# Apply Function to List (Same as "Beta" in Julios model)
+cf2 = lapply(histdat,get.cf2)
+
+cf2[[65]]
+i <- 65
+Odds[[i]]
+Beta.l <- cf2[[65]]
+p.hat <- 1/(1+exp(-(Beta.l["(Intercept)"]+Beta.l["V15"]+Beta.l["V26"]+Beta.l["V32"]+Beta.l["V55"]+Beta.l["V63"]+Beta.l["V72"]+Beta.l["V84"]+Beta.l["V94"]+Beta.l["V13:V23"]))); p.hat
+# Improves to 88% if I include interaction between V23 and V13
+
+# V12 con V24
+# V13 con V23
+# V15 con V22
+# Interact variable 1 and 2
+# Eric if you can help me here would be great
+
 i <- 221
 Odds[[i]]
 Beta.l <- Beta[[i]]
@@ -908,3 +936,15 @@ summary(model.ds)
 Beta.ds<- coef(model.ds)
 p.hat <- 1/(1+exp(-(Beta.ds["V12"]+Beta.ds["V26"]+Beta.ds["V32"]+Beta.ds["V64"]+Beta.ds["V85"]))); p.hat
 # Only 18%
+
+# Only experiment 221 has that combination, I would rely much on it
+indices = numeric()
+j = 1
+for(i in 1:length(histdat)) {
+  dat = histdat[[i]]
+  if(!is.null(dat$V1) & !is.null(dat$V2) & !is.null(dat$V3) & is.null(dat$V4) & is.null(dat$V5)  & !is.null(dat$V6) & is.null(dat$V7) & !is.null(dat$V8) & !is.null(dat$V9)){
+    indices[j] = i
+    j = j+1
+  }
+}
+
