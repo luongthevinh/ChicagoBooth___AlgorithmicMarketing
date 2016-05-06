@@ -487,7 +487,7 @@ get.cf = function(dat){
 
 # Apply Function to List (Same as "Beta" in Julios model)
 cf = lapply(histdat,get.cf)
-
+cf
 
 # Whats the full model?
 cfmax = cf[[which.max(sapply(cf,length))]]
@@ -844,7 +844,7 @@ p.hat <- 1/(1+exp(-(Beta.ds["V14"]+Beta.ds["V26"]+Beta.ds["V33"]+Beta.ds["V55"]+
 # V8: levels 2,4
 # V9: levels 4,5,6 
 
-# NEW THING TO TRY
+# NEW THING TO TRY: Fater this discovery try interactions
 red.mat5 = gen.factorial(
   levels=c(2,2,2,3,2,2,2,2,3),
   varNames=c("V1","V2","V3","V4","V5","V6","V7","V8","V9"),
@@ -882,3 +882,26 @@ p.hat <- 1/(1+exp(-(Beta.ds["V14"]+Beta.ds["V26"]+Beta.ds["V33"]+Beta.ds["V55"]+
 # ctr = 17.5% same as before
 
 # Best message get 17.5% 
+
+
+
+#### Testing histdata #######
+# 10: 23.16% 
+# 27: 30.9% 
+# 65: 72% INVESTIGATE FURTHER
+# 87: 53% INVESTIGATE FURTHER
+# 88: 38.7%
+# 116: 12.3% (don't take variables out)
+# 144: 13.7% (don't take variables out)
+# 171: 14.8% (don't take variables out)
+# 172: 22.8% Again, 7 is not in the model
+# 174: 17.9% Again, 9 is not in the model
+# 221: 82.3% with 4, 5 and 7 out of the model (interesting)
+# 294: 31.14%
+i <- 65
+Odds[[i]]
+Beta.l <- Beta[[i]]
+p.hat <- 1/(1+exp(-(Beta.l["V14"]+Beta.l["V26"]+Beta.l["V33"]+Beta.l["V42"]+Beta.l["V55"]+Beta.l["V72"]+Beta.l["V84"]+Beta.l["V93"]))); p.hat
+histdat[[i]]
+model.ds<-glm(cbind(Unique_Clicks,(Unique_Sent-Unique_Clicks))~.-1,data=histdat[[i]],family='binomial')
+summary(model.ds)
