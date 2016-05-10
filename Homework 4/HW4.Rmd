@@ -77,8 +77,9 @@ Nonetheless the comments on the model made before, as appreciated in the result 
 This is in line with the no variability shown in the table below for the open rate:
 ```{r}
 summary(df$'unique_open'/df$'successful_sent')
-````
+```
 
+Also, the best message to obtain the maximium "open rate" given the parameters of the regression is: Intro L3, headlineL2, main_textL1, buttonL2, actionL1, purposeL2, and symbolL2.
 
 Logit model for Clicks:
 
@@ -108,6 +109,8 @@ Odds2 <- exp(Beta2); Odds2
 In line with the comments made above, as appreciated in the result of the odds, some odds for certain variables of the model are very different from 1, this means that the base probability of clicking an email :__`r p.hat2`__ is affected by the variations. 
 
 For example, introL3 increases the odds by __`r Odds2['introL3']`__. Other important variables are headlineL2, headlineL3, and actionL2.
+
+Also, the best message to obtain the maximium "click rate" given the parameters of the regression is: Intro L3, headlineL2, main_textL1, buttonL1, actionL2, purposeL1, and symbolL1.(A different message than the one needed to maximize the open rate).
 
 
 # Q3: Use the estimated models to compute predicted probabilities for all possible message combinations (separate predictions for opens and clicks). Which messages have the highes fitted response probabilities? Are the two messages similar or different? Discuss.
