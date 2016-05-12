@@ -788,7 +788,7 @@ ds4.red
 final.design = ds4.red
 final.design$N <- 5000
 final.design
-write.csv(final.design, file="JGdesign.csv", row.names = FALSE)
+#write.csv(final.design, file="JGdesign.csv", row.names = FALSE)
 # Evaluating the model
 # Predicting
 opt_federov_results <- cbind(ds4.red, 1/(1+exp(-predict.glm(combined_model, ds4.red))))

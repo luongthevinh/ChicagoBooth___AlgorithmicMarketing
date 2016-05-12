@@ -111,6 +111,7 @@ boxplot(cfmat[,c("V92","V93","V94","V95","V96")])
 # Run a regression on our results
 reg1 <- glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~.,data=df,family="binomial")
 cf2 = coef(glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~.,data=df,family="binomial"))
+cf2
 
 # All variables distribution in a barplot to see differences
 # If someone can automate this please
@@ -135,6 +136,18 @@ Odds <- exp(Beta); Odds
 p.hat <- 1/(1+exp(-(Beta["(Intercept)"]+Beta["V26"]+Beta["V33"]+Beta["V55"]+Beta["V63"]+Beta["V72"]+Beta["V84"]))); p.hat
 # Our best model has a expected click through rate of 18.8%  
 
+# Variables in design, so: V14 in intercept, V41, V94 (maybe V92 better)
+# V1: levels 4,6
+# V2: levels 3,6
+# V3: levels 2,3
+# V4: levels  1,2,3
+# V5: levels 2,5
+# V6: levels 2,3
+# V7: levels 1,2
+# V8: levels 2,4
+# V9: levels 4,5,6 
+
+
 # expected profit: $83,984.1
 profit((N-(36*5000))*p.hat+sum(df$Unique_Clicks),36,0)
 
@@ -142,3 +155,36 @@ profit((N-(36*5000))*p.hat+sum(df$Unique_Clicks),36,0)
 # Almost all parameters are really significant! 
 summary(reg1)
 
+
+#------ Testing performance of message based on historical data ------#
+## ------------Eric's attempt at reg model-----------------------
+## Running regression on experiments that include all 9 variables
+## Find the experiments that include all 9 variables
+indices = numeric()
+j = 1
+for(i in 1:length(histdat)) {
+  dat = histdat[[i]]
+  if(!is.null(dat$V1) & !is.null(dat$V2) & !is.null(dat$V3) & !is.null(dat$V4) & !is.null(dat$V5)  & !is.null(dat$V6) & !is.null(dat$V7) & !is.null(dat$V8) & !is.null(dat$V9)){
+    indices[j] = i
+    j = j+1
+  }
+}
+##Combine the data from those experiments into the combined_dat matrix
+j=1
+combined_dat <- histdat[[indices[1]]]
+for(i in indices) {
+  num_campaigns = length(histdat[[i]]$V1)-1
+  combined_dat[j:(j+num_campaigns),] <- histdat[[i]]
+  j = j+num_campaigns
+}
+# Run the regression on the combined data
+combined_model<-glm(cbind(Unique_Clicks,(Unique_Sent-Unique_Clicks))~.-1,data=combined_dat,family='binomial')
+summary(combined_model)
+Beta.h <- coef(combined_model)
+Odds.h <- exp(Beta.h); Odds.h
+p.hat2 <- 1/(1+exp(-(Beta.h["V14"]+Beta.h["V26"]+Beta.h["V33"]+Beta.h["V55"]+Beta.h["V63"]+Beta.h["V72"]+Beta.h["V84"]+Beta.h["V94"]))); p.hat2
+# We would have get a 17.5%
+
+# Can we do it better?
+Odds
+# Maybe V92 instead of V94
