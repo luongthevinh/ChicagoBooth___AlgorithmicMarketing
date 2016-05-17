@@ -140,7 +140,7 @@ predict.profit = function(price, cost)
 # price Seq
 pseq = seq(from=49,to=399,by=10)
 
-cost=0
+cost=10
 # Profits at each price
 revhat = predict.profit(pseq,cost)
 plot(revhat~pseq)
@@ -164,7 +164,7 @@ optimize(f = predict.profit, interval = c(0,1000),cost, maximum = TRUE)
 # In other words they would charge different uniform prices for each state or job category. 
 # Use the data and the code to justify which approach you think would get them higher expected 
 # revenues.
-
+cost=0
 # Construct Prediction Function for State price discrimination
 g3 = glm(SUB~(factor(job_state))*prc,data=dz1,family='binomial')
 
@@ -296,7 +296,7 @@ uni.rev2 = uni2$objective; uni.rev2
 uni.price2 = uni2$maximum; uni.price2
 
 # Yes the answer change, since we will charge a higher price (inelastic demand in all cases
-# but the profits will fall for sure)
+# but the profits will fall for sure but not by 10 per customer, but only aprox 2)
 
 #################
 # Uniform pricing
