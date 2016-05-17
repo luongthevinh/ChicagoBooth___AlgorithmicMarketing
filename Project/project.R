@@ -188,3 +188,37 @@ p.hat2 <- 1/(1+exp(-(Beta.h["V14"]+Beta.h["V26"]+Beta.h["V33"]+Beta.h["V55"]+Bet
 # Can we do it better?
 Odds
 # Maybe V92 instead of V94
+
+###################################
+########## Second Design ##########
+###################################
+# What would be needed to improve
+
+# expected profit1: $83,984.1
+
+# Expected profit design 2 of 36 no improvement in clicks: 73985.5
+profit((N-(72*5000))*p.hat+2*sum(df$Unique_Clicks),72,0)
+
+# CTR for design 2 of 36 to break even: 20.95%
+profit((N-(72*5000))*0.2095+2*sum(df$Unique_Clicks),72,0)
+
+
+# Expected profit design 2 of 20 no improvement in clicks: 78689.24
+profit((N-(56*5000))*p.hat+2*sum(df$Unique_Clicks),56,0)
+
+# CTR for design 2 of 36 to break even: 19.92%
+profit((N-(56*5000))*0.1992+2*sum(df$Unique_Clicks),56,0)
+
+# Gap to be improved?
+0.1992-0.188
+
+
+# Model to try:
+# V42, V55, V61, V72, V84, V92
+
+# V92 seems similar to V94, and maybe better
+# V61 similar to V63, and maybe better
+# V42: more incertainty V41 seems better, maybe an interaction?
+# V33
+# V26
+# V14
