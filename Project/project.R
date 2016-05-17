@@ -16,6 +16,7 @@ df <- as.data.frame(unclass(df))
 # Levels in our design for the analysis
 str(df)
 
+
 # Your total project profitability will be calculated as follows
 N <- 5000000
 profit = function(unique_clicks,ncampaigns,other)
@@ -110,6 +111,7 @@ boxplot(cfmat[,c("V92","V93","V94","V95","V96")])
 ###############################################
 # Run a regression on our results
 reg1 <- glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~.,data=df,family="binomial")
+reg2 <- glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~.*.,data=df,family="binomial")
 cf2 = coef(glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~.,data=df,family="binomial"))
 cf2
 
@@ -135,7 +137,7 @@ Beta <- cf2
 Odds <- exp(Beta); Odds
 p.hat <- 1/(1+exp(-(Beta["(Intercept)"]+Beta["V26"]+Beta["V33"]+Beta["V55"]+Beta["V63"]+Beta["V72"]+Beta["V84"]))); p.hat
 # Our best model has a expected click through rate of 18.8%  
-
+summary(reg1)
 # Variables in design, so: V14 in intercept, V41, V94 (maybe V92 better)
 # V1: levels 4,6
 # V2: levels 3,6
@@ -185,7 +187,10 @@ Odds.h <- exp(Beta.h); Odds.h
 p.hat2 <- 1/(1+exp(-(Beta.h["V14"]+Beta.h["V26"]+Beta.h["V33"]+Beta.h["V55"]+Beta.h["V63"]+Beta.h["V72"]+Beta.h["V84"]+Beta.h["V94"]))); p.hat2
 # We would have get a 17.5%
 
+
+##############################
 # Can we do it better?
+##############################
 Odds
 # Maybe V92 instead of V94
 
@@ -203,14 +208,14 @@ profit((N-(72*5000))*p.hat+2*sum(df$Unique_Clicks),72,0)
 profit((N-(72*5000))*0.2095+2*sum(df$Unique_Clicks),72,0)
 
 
-# Expected profit design 2 of 20 no improvement in clicks: 78689.24
-profit((N-(56*5000))*p.hat+2*sum(df$Unique_Clicks),56,0)
+# Expected profit design 2 of 20 no improvement in clicks: 79754.94
+profit((N-(56*5000))*p.hat+sum(df$Unique_Clicks)+.165*(5000*20),56,0)
 
 # CTR for design 2 of 36 to break even: 19.92%
-profit((N-(56*5000))*0.1992+2*sum(df$Unique_Clicks),56,0)
+profit((N-(56*5000))*.197+sum(df$Unique_Clicks)+.165*(5000*20),56,0)
 
 # Gap to be improved?
-0.1992-0.188
+0.197-0.188
 
 
 # Model to try:
@@ -222,3 +227,70 @@ profit((N-(56*5000))*0.1992+2*sum(df$Unique_Clicks),56,0)
 # V33
 # V26
 # V14
+
+# Test on ctr for our design
+design_ctr <- 1/(1+exp(-predict.glm(combined_model, df))); design_ctr
+df$Unique_Clicks/df$Unique_Sent
+
+# All combination on historical data
+#Run the regression on the combined data
+combined_model_int<-glm(cbind(Unique_Clicks,(Unique_Sent-Unique_Clicks))~.*.,data=combined_dat,family='binomial')
+
+# Interactions
+design_ctr1 <- 1/(1+exp(-predict.glm(combined_model_int, mat)))
+cbind(mat[design_ctr1>.159,],design_ctr1[design_ctr1>.159])
+
+# No interactions
+design_ctr4 <- 1/(1+exp(-predict.glm(combined_model, mat)))
+cbind(mat[design_ctr4>.159,],design_ctr4[design_ctr4>.159])
+
+# Our design combinations
+red.mat4 = gen.factorial(
+  levels=c(2,2,2,3,2,2,2,2,3),
+  varNames=c("V1","V2","V3","V4","V5","V6","V7","V8","V9"),
+  factors="all"
+)
+# Rename levels before predict
+levels(red.mat4$V1) <- c(4,6)
+levels(red.mat4$V2) <- c(3,6)
+levels(red.mat4$V3) <- c(2,3)
+levels(red.mat4$V4) <- c(1,2,3)
+levels(red.mat4$V5) <- c(2,5)
+levels(red.mat4$V6) <- c(2,3)
+levels(red.mat4$V7) <- c(1,2)
+levels(red.mat4$V8) <- c(2,4)
+levels(red.mat4$V9) <- c(4,5,6)
+red.mat4
+
+
+# All combinations using our data
+# Not used because of results
+design_ctr2 <- 1/(1+exp(-predict.glm(reg2, red.mat4)))
+Our_int <- cbind(red.mat4[design_ctr2>.4,],design_ctr2[design_ctr2>.4])
+1/(1+exp(-predict.glm(combined_model_int, Our_int)))
+
+
+# Linear combinations using our data
+design_ctr3 <- 1/(1+exp(-predict.glm(reg1, red.mat4)))
+cbind(red.mat4[design_ctr3>.15,],design_ctr3[design_ctr3>.15])
+
+
+library(xlsx)
+df2 <- read.xlsx("design2.xlsx", sheetIndex=1)
+df2$V1 <- as.factor(df2$V1)
+df2$V2 <- as.factor(df2$V2)
+df2$V3 <- as.factor(df2$V3)
+df2$V4 <- as.factor(df2$V4)
+df2$V5 <- as.factor(df2$V5)
+df2$V6 <- as.factor(df2$V6)
+df2$V7 <- as.factor(df2$V7)
+df2$V8 <- as.factor(df2$V8)
+df2$V9 <- as.factor(df2$V9)
+
+
+design_ctr <- 1/(1+exp(-predict.glm(combined_model, df2))); design_ctr
+summary(design_ctr)
+
+design_ctr_int <- 1/(1+exp(-predict.glm(combined_model_int, df2))); design_ctr_int
+summary(design_ctr_int)
+cbind(df2, design_ctr, design_ctr_int)
