@@ -294,3 +294,7 @@ summary(design_ctr)
 design_ctr_int <- 1/(1+exp(-predict.glm(combined_model_int, df2))); design_ctr_int
 summary(design_ctr_int)
 cbind(df2, design_ctr, design_ctr_int)
+
+library(xlsx)
+second_design <- read.xlsx("design2_a.xlsx", sheetIndex=1)
+write.csv(second_design, file="second_design.csv", row.names = FALSE)
