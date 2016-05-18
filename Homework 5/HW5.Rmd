@@ -20,16 +20,13 @@ load(file="ZipDat.Rd")
 ```
 
 
-# Q1: If the costs of servicing each customer are $10 (rather than zero) what is the optimal uniform price that Ziprecruiter should charge?
+## Q1: If the costs of servicing each customer are $10 (rather than zero) what is the optimal uniform price that Ziprecruiter should charge?
 
 Since Ziprecruiter can only charge a uniform price, we will run a binomial regression of subscriptions on price to figure out the optimal price for a cost of 0, and a cost of 10.
 
 ```{r}
 g2 = glm(SUB~prc,data=dz1,family='binomial')
 summary(g2)
-g2$coefficients[2]
-1-exp(g2$coefficients[2])
-1/(1+exp(-(g2$coefficients[1]+g2$coefficients[2]*399)))
 ```
 
 As appreciated, the coefficient for price is  very small, exacly: __`r g2$coefficients[2]`__. This means that the odds of a visitor to subscribe are multiplied by __`r exp(g2$coefficients[2])`__, so every 1 dolar increase in price, the subscription odd is reduced by __`r 1-exp(g2$coefficients[2])`__.
@@ -75,7 +72,7 @@ If the cost is equal to 0, the optimal price is __`r opt1$maximum`__, and the ex
 
 The increase of 10 in the cost only implies that the expected profit per customer goes down by __`r opt1$objective-opt$objective`__. This happens because the demand is so inelastic that of the 10 cost increase, __`r opt1$maximum-opt$maximum`__ is passed to the customer due to a price increase from __`r opt$maximum`__ to __`r opt1$maximum`__, and the rest is the drop in the expected profit per customer.
 
-# Q2: Ziprecruiter is deciding between segmenting their customer base either by state or by job category and then charging a flat fee for each group within the segment (i.e. for each state or category). In other words they would charge different uniform prices for each state or job category. Use the data and the code to justify which approach you think would get them higher expected revenues.
+## Q2: Ziprecruiter is deciding between segmenting their customer base either by state or by job category and then charging a flat fee for each group within the segment (i.e. for each state or category). In other words they would charge different uniform prices for each state or job category. Use the data and the code to justify which approach you think would get them higher expected revenues.
 
 First, we create a function to price discriminate based on state
 
@@ -181,8 +178,7 @@ The expected revenue per customer goes from __`r opt$objective`__ in the uniform
 
 This is even better than segmenting by state, so we would prefer to segment by job description.
 
-# Q3: Does your answer to Q2 change if you assume marginal costs per customer are $10 
-# and the decision was made based on profits rather than revenues?
+## Q3: Does your answer to Q2 change if you assume marginal costs per customer are $10 and the decision was made based on profits rather than revenues?
 
 We re run the Q2 code using a cost of 10.
 
@@ -240,10 +236,176 @@ Prices are higher if cost is 10. The average prices increases from __`r price.jo
 The conclusion is that we still prefer to discriminate by Job Category rather than State, and much better than uniform pricing. Also, since demand is inelastic, a cost increase can be passed to customers in order to keep the expected profit per customer almost the same (only a little drop)
 
 
+## It is important to notice that there are some states that have less than 10 observations, as well as job categories that have less than 10 observations, that's why when we run the regression, the optimal price is to charge the highest price in the range. We believe this is not correct, that's why we capped the price.
+
+## Another approach to solve this problem would be to run a regression only for states and job categories with more than 10 observations, and offer a uniform price to the customers in states and job categories that we dont have further information
+
+# Appendix A: No cap in prices
+
+# If we set the cap to the price to 999, the results are:
+
+## Q2: Ziprecruiter is deciding between segmenting their customer base either by state or by job category and then charging a flat fee for each group within the segment (i.e. for each state or category). In other words they would charge different uniform prices for each state or job category. Use the data and the code to justify which approach you think would get them higher expected revenues.
+
+First, we create a function to price discriminate based on state
+
+```{r}
+g3 = glm(SUB~(factor(job_state))*prc,data=dz1,family='binomial')
+
+predict.rev.state = function(price,jstate="CA", cost)
+{
+  #Supress Warnings
+  options(warn=-1)
+  # "New Data"
+  nd = data.frame(job_state=jstate,prc=price)
+  # Predict
+  phat = predict(g3,nd,type='response')  
+  # Reset Warnings
+  options(warn=0)
+  # Expected Revenues
+  erev = as.numeric(phat*(price-cost))
+  return(erev)
+}
+```
+
+Second, we create a function to price discriminate based on job category
+
+```{r}
+# Construct Prediction Function for job category price discrimination
+g4 = glm(SUB~(factor(job_category_classified_by_ai))*prc,data=dz1,family='binomial')
+
+predict.rev.job = function(price, jcat="Legal", cost)
+{
+  #Supress Warnings
+  options(warn=-1)
+  # "New Data"
+  nd = data.frame(job_category_classified_by_ai=jcat,prc=price)
+  # Predict
+  phat = predict(g4,nd,type='response')  
+  # Reset Warnings
+  options(warn=0)
+  # Expected Revenues
+  erev = as.numeric(phat*(price-cost))
+  return(erev)
+}
+```
+
+Third, we construct the variables to have levels for every unique state and job description
+
+```{r}
+jstate = unique(dz1$job_state)
+jstatetab = table(dz1$job_state)
+jstatetab=sort(jstatetab)
+
+jcats = unique(dz1$job_category_classified_by_ai)
+jtab = table(dz1$job_category_classified_by_ai)
+jtab=sort(jtab)
+```
+
+Forth, for a cost of 0, we calculate the optimal price for every state using our function, and we store the revenue and price in a variable to later calculate the expected revenue per customer, and average price charged. Because we have insufficient data for some states, the price for those states can get absurdly high and unrealistic.  For that reason, we cap the price at at most $399.
+
+```{r}
+# Set the cost
+cost=0
+
+rev.state=0
+price.state=0
+for (i in 1:length(jstatetab)){
+  # Optimizing price for every state
+  opt = optimize(f = predict.rev.state, interval = c(0,999), jstate=names(jstatetab[i]), cost, maximum = TRUE)
+  
+  # Aggregate revenue 
+  rev.state = rev.state +jstatetab[i]*opt$objective
+  
+  # Aggregate price
+  price.state = price.state +jstatetab[i]*opt$maximum
+}
+rev.state/sum(jstatetab)
+price.state/sum(jstatetab)
+```
+
+The expected revenue per customer goes from __`r opt$objective`__ in the uniform case, to __`r rev.state/sum(jstatetab)`__ with an average price of __`r price.state/sum(jstatetab)`__
+
+Fifth, we do the same for every job description again capping price at a max of $399 to prevent unrealistically high prices for job descriptions/categories where we have insufficient data and we have
 
 
+```{r}
+# Set the cost
+rev.job=0
+price.job=0
+for (i in 1:43){
+  # Optimizing price for every job category
+  opt = optimize(f = predict.rev.job, interval = c(0,999), jcat=jcats[i], cost, maximum = TRUE)
+  
+  # Aggregate revenue 
+  rev.job = rev.job + jtab[i]*opt$objective
+  
+  # Aggregate price
+  price.job = price.job + jtab[i]*opt$maximum
+}
+rev.job/sum(jtab)
+price.job/sum(jtab)
+```
 
-# Nonetheless, revenue per customer still higher than uniform pricing and state discrimination
-# and the average price lower than both of them
+The expected revenue per customer goes from __`r opt$objective`__ in the uniform case, to __`r rev.job/sum(jtab)`__ with an average price of __`r price.job/sum(jtab)`__
+
+This is even better than segmenting by state, so we would prefer to segment by job description.
+
+## Q3: Does your answer to Q2 change if you assume marginal costs per customer are $10 and the decision was made based on profits rather than revenues?
+
+We re run the Q2 code using a cost of 10.
+
+```{r}
+cost=10
+
+# Total Revenue from State discrimination
+rev.state2=0
+price.state2=0
+for (i in 1:length(jstatetab)){
+  # Optimizing price for every state
+  opt = optimize(f = predict.rev.state, interval = c(0,999), jstate=names(jstatetab[i]), cost, maximum = TRUE)
+  
+  # Aggregate revenue 
+  rev.state2 = rev.state2 +jstatetab[i]*opt$objective
+  
+  # Aggregate price
+  price.state2 = price.state2 +jstatetab[i]*opt$maximum
+}
+rev.state2/sum(jstatetab)
+price.state2/sum(jstatetab)
+
+# Total Revenue from Job Category discrimination
+rev.job2=0
+price.job2=0
+for (i in 1:43){
+  # Optimizing price for every job category
+  opt = optimize(f = predict.rev.job, interval = c(0,999), jcat=jcats[i], cost, maximum = TRUE)
+  
+  # Aggregate revenue 
+  rev.job2 = rev.job2 + jtab[i]*opt$objective
+  
+  # Aggregate price
+  price.job2 = price.job2 + jtab[i]*opt$maximum
+}
+rev.job2/sum(jtab)
+price.job2/sum(jtab)
+```
+
+The answer that segmenting by job category is the better option does not change, but we will charge a higher price (inelastic demand in the two segmenting cases but the profits will fall for sure but not by 10 per customer)
+
+# As a summary
+## Uniform pricing
+Prices are higher if cost is 10. The prices increases from __`r opt$maximum`__ to __`r opt1$maximum`__. The profit per customer is lower if cost is 10; it goes from __`r opt$objective`__ to __`r opt1$objective`__.
+
+## State pricing
+Prices are higher if cost is 10. The average prices increases from __`r price.state/sum(jstatetab)`__ to __`r price.state2/sum(jstatetab)`__, and the profit per customer is lower if cost is 10; it goes from __`r rev.state/sum(jstatetab)`__ to __`r rev.state2/sum(jstatetab)`__ 
+
+Nonetheless, revenue per customer still higher than uniform pricing and the average price lower.
+
+
+## Job Category pricing
+Prices are higher if cost is 10. The average prices increases from __`r price.job/sum(jtab)`__ to __`r price.job2/sum(jtab)`__, and the profit per customer is lower if cost is 10; it goes from __`r rev.job/sum(jtab)`__ to __`r rev.job2/sum(jtab)`__.
+
+The conclusion is that we still prefer to discriminate by Job Category rather than State, and much better than uniform pricing. Also, since demand is inelastic, a cost increase can be passed to customers in order to keep the expected profit per customer almost the same (only a little drop)
+
 
 
