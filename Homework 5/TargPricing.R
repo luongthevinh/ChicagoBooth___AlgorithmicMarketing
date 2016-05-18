@@ -115,7 +115,6 @@ optimize(f = predict.rev, interval = c(0,1000), jstate="NY", jcat=jcats[1], maxi
 # Q1: If the costs of servicing each customer are $10 (rather than zero) 
 # what is the optimal uniform price that Ziprecruiter should charge?
 
-# Suggests inflexion around $249-$299 
 g2 = glm(SUB~prc,data=dz1,family='binomial')
 summary(g2)
 hist(predict(g2,type='response'))

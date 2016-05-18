@@ -1,0 +1,210 @@
+---
+title: 'Homework #5: ZipRecruiter'
+author: Eric Cheng, Julio Guzman, Vinh Luong, Jorge Ortega, Shao Zhu
+output: pdf_document
+fontsize: 12
+geometry: margin=0.6in
+---
+
+# Load Libraries
+
+```{r}
+library(Hmisc)
+```
+
+
+# Load Data
+
+```{r}
+load(file="ZipDat.Rd")
+```
+
+
+# Q1: If the costs of servicing each customer are $10 (rather than zero) what is the optimal uniform price that Ziprecruiter should charge?
+
+Since Ziprecruiter can only charge a uniform price, we will run a binomial regression of subscriptions on price to figure out the optimal price for a cost of 0, and a cost of 10.
+
+```{r}
+g2 = glm(SUB~prc,data=dz1,family='binomial')
+summary(g2)
+g2$coefficients[2]
+1-exp(g2$coefficients[2])
+1/(1+exp(-(g2$coefficients[1]+g2$coefficients[2]*399)))
+```
+
+As appreciated, the coefficient for price is  very small, exacly: __`r g2$coefficients[2]`__. This means that the odds of a visitor to subscribe are multiplied by __`r exp(g2$coefficients[2])`__, so every 1 dolar increase in price, the subscription odd is reduced by __`r 1-exp(g2$coefficients[2])`__.
+
+In other words, if the price is 299, the probability of subscribing is __`r 1/(1+exp(-(g2$coefficients[1]+g2$coefficients[2]*299)))`__, and if the price is increased to 399, the probability goes down to __`r 1/(1+exp(-(g2$coefficients[1]+g2$coefficients[2]*399)))`__. This implies that demand is very inelastic.
+
+```{r}
+# Construct Prediction Function for Profits with uniform pricing
+predict.profit = function(price, cost)
+{
+  #Supress Warnings
+  options(warn=-1)
+  # "New Data"
+  nd = data.frame(prc=price)
+  # Predict with the function only for price
+  phat = predict(g2,nd,type='response')  
+  # Reset Warnings
+  options(warn=0)
+  # Expected Profits
+  eprofit = as.numeric(phat*(price-cost))
+  return(eprofit)
+}
+```
+
+Evaluating the profits and optimal price for cost = 0, and cost = 10.
+
+```{r}
+cost=0
+# Optimize
+opt = optimize(f = predict.profit, interval = c(0,1000),cost, maximum = TRUE)
+```
+
+If the cost is equal to 0, the optimal price is __`r opt$maximum`__, and the expected revenue per customer in the web is __`r opt$objective`__. The expected revenue per customer is the probability of signing into the website times the optimal price. 
+
+```{r}
+cost=10
+# Optimize
+opt1 = optimize(f = predict.profit, interval = c(0,1000),cost, maximum = TRUE)
+
+```
+
+If the cost is equal to 0, the optimal price is __`r opt1$maximum`__, and the expected revenue per customer in the web is __`r opt1$objective`__. 
+
+As appreciate, the increase of 10 in the cost only implies that the expected revenue per customer goes down by __`r opt1$objective-opt$objective`__. This happens because the demand is so inelastic that of the 10 cost increase, __`r opt1$maximum-opt$maximum`__ is traspased to the customer due to a price increase from __`r opt$maximum`__ to __`r opt1$maximum`__, and the rest is the drop in the expected customer revenue per customer.
+
+# Q2: Estimate two logit models based on the data (assuming a simple linear specification) - one for opens and another for clicks. Discuss your results based on the nature of the variables (see variable names and descriptions tab).
+
+```{r}
+df <- df[1:16, 4:14]
+df$successful_sent = df$unique_sent - df$bounced
+```
+
+Logit model for Opens:
+
+```{r}
+opens_model <-
+  glm(cbind(unique_opened, successful_sent - unique_opened) ~ 
+        intro + headline + main_text + button + action + purpose + symbol,
+      data = df,
+      family = 'binomial')
+
+summary(opens_model)
+```
+
+Some comments on this model:
+
+- __Headline__: All options are not statistically different, suggesting the Headline does not reallyt matter to the probabilility of people opening the message;
+- __Main Text__: The second choice _"Check out our selection for you - add a new phone, tablet, or other device!"_ has a negative significant coefficient. This is perhaps because it is less informative than the first choice in terms of articulating the benefits;
+- __Action__: The second choice _"Click Here to..."_ is also negative and significant, suggesting a higher tendency for people to find that deceiving
+
+```{r}
+# Coefficients analysis
+Beta1 <- coef(opens_model)
+p.hat1 <- exp(Beta1["(Intercept)"])/(1+exp(Beta1["(Intercept)"]))
+p.data1 <- df$unique_opened[1]/df$"successful_sent"[1]
+Odds1 <- exp(Beta1); Odds1
+```
+
+Nonetheless the comments on the model made before, as appreciated in the result of the odds, all odds for the model are very close to 1, this means that the base probability of opening an email :__`r p.hat1`__ is almost not affected by the variations in the model.
+
+
+This is in line with the no variability shown in the table below for the open rate:
+```{r}
+summary(df$'unique_open'/df$'successful_sent')
+```
+
+Also, the best message to obtain the maximium "open rate" given the parameters of the regression is: Intro L3, headlineL2, main_textL1, buttonL2, actionL1, purposeL2, and symbolL2.
+
+Logit model for Clicks:
+
+```{r}
+clicks_model <-
+  glm(cbind(unique_clicks, successful_sent - unique_clicks) ~
+        intro + headline + main_text + button + action + purpose + symbol,
+      data = df,
+      family = 'binomial')
+
+summary(clicks_model)
+```
+
+There are some notable differences in this model vs. the one for Opens:
+
+- __Headline__: all options are statistically significantly different now, suggesting people do care about what the Headline says in deciding whether to follow through. The first option _"You'll Love It"_ seems to be the worst, suggesting a degree of distrust for such a claim;
+- __Action__: the second option _"Click Here to..."_ now has a positive significatn coefficient - so once people trust the content of the message, a prompt to click does lead to a higher tendency to click through.
+
+```{r}
+# Coefficients analysis
+Beta2 <- coef(clicks_model)
+p.hat2 <- exp(Beta2["(Intercept)"])/(1+exp(Beta2["(Intercept)"]))
+p.data2 <- df$unique_clicks[1]/df$"successful_sent"[1]
+Odds2 <- exp(Beta2); Odds2
+```
+
+In line with the comments made above, as appreciated in the result of the odds, some odds for certain variables of the model are very different from 1, this means that the base probability of clicking an email :__`r p.hat2`__ is affected by the variations. 
+
+For example, introL3 increases the odds by __`r Odds2['introL3']`__. Other important variables are headlineL2, headlineL3, and actionL2.
+
+Also, the best message to obtain the maximium "click rate" given the parameters of the regression is: Intro L3, headlineL2, main_textL1, buttonL1, actionL2, purposeL1, and symbolL1.(A different message than the one needed to maximize the open rate).
+
+
+# Q3: Use the estimated models to compute predicted probabilities for all possible message combinations (separate predictions for opens and clicks). Which messages have the highes fitted response probabilities? Are the two messages similar or different? Discuss.
+
+```{r}
+all_combinations <-
+  gen.factorial(
+    levels = c(4, 4, 2, 2, 2, 4, 2),
+    factors = 'all',
+    varNames = c('intro',
+                 'headline',
+                 'main_text',
+                 'button',
+                 'action',
+                 'purpose',
+                 'symbol'))
+
+levels(all_combinations$intro) <- paste('L', 1:4, sep='')
+levels(all_combinations$headline) <- paste('L', 1:4, sep='')
+levels(all_combinations$main_text) <- paste('L', 1:2, sep='')
+levels(all_combinations$button) <- paste('L', 1:2, sep='')
+levels(all_combinations$action) <- paste('L', 1:2, sep='')
+levels(all_combinations$purpose) <- paste('L', 1:4, sep='')
+levels(all_combinations$symbol) <- paste('L', 1:2, sep='')
+```
+
+Open probabilities:
+
+```{r}
+open_probs <- predict(opens_model, newdata = all_combinations, type='response')
+
+summary(open_probs)
+```
+
+The message with the highest predicted probability of being opened has the following configuration:
+
+```{r}
+all_combinations[which.max(open_probs), ]
+```
+
+Overall, however, the probability of a message being opened ranges extremely narrowly in the mid-50%s. We can practically say that a message has a 50-50 chance of being opened, no matter how it appears.
+
+Click probabilities:
+
+```{r}
+click_probs <- predict(clicks_model, newdata = all_combinations, type='response')
+
+summary(click_probs)
+```
+
+The click-through probabilities, unlike the open probabilities, have meaningful variation among them. The message with the highest predicted probability of being clicked through has the following configuration:
+
+```{r}
+all_combinations[which.max(click_probs), ]
+```
+
+
+# Q4: Please use the historical data provided in the project section of chalk to provide me your experimental design. See HistData.R for details.
+
+
