@@ -156,7 +156,7 @@ price.state/sum(jstatetab)
 
 The expected revenue per customer goes from __`r opt$objective`__ in the uniform case, to __`r rev.state/sum(jstatetab)`__ with an average price of __`r price.state/sum(jstatetab)`__
 
-Fifth, we do the same for every job description again capping price at a max of $399 and we have
+Fifth, we do the same for every job description again capping price at a max of $399 to prevent unrealistically high prices for job descriptions/categories where we have insufficient data and we have
 
 
 ```{r}
