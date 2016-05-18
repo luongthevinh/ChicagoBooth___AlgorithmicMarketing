@@ -62,7 +62,7 @@ cost=0
 opt = optimize(f = predict.profit, interval = c(0,1000),cost, maximum = TRUE)
 ```
 
-If the cost is equal to 0, the optimal price is __`r opt$maximum`__, and the expected revenue per customer in the web is __`r opt$objective`__. The expected revenue per customer is the probability of signing into the website times the optimal price. 
+If the cost is equal to 0, the optimal price is __`r opt$maximum`__, and the expected profit per customer in the web is __`r opt$objective`__. The expected profit per customer is the probability of signing into the website times the optimal price. 
 
 ```{r}
 cost=10
@@ -71,9 +71,9 @@ opt1 = optimize(f = predict.profit, interval = c(0,1000),cost, maximum = TRUE)
 
 ```
 
-If the cost is equal to 0, the optimal price is __`r opt1$maximum`__, and the expected revenue per customer in the web is __`r opt1$objective`__. 
+If the cost is equal to 0, the optimal price is __`r opt1$maximum`__, and the expected profit per customer in the web is __`r opt1$objective`__. 
 
-As appreciate, the increase of 10 in the cost only implies that the expected revenue per customer goes down by __`r opt1$objective-opt$objective`__. This happens because the demand is so inelastic that of the 10 cost increase, __`r opt1$maximum-opt$maximum`__ is traspased to the customer due to a price increase from __`r opt$maximum`__ to __`r opt1$maximum`__, and the rest is the drop in the expected customer revenue per customer.
+The increase of 10 in the cost only implies that the expected profit per customer goes down by __`r opt1$objective-opt$objective`__. This happens because the demand is so inelastic that of the 10 cost increase, __`r opt1$maximum-opt$maximum`__ is passed to the customer due to a price increase from __`r opt$maximum`__ to __`r opt1$maximum`__, and the rest is the drop in the expected profit per customer.
 
 # Q2: Ziprecruiter is deciding between segmenting their customer base either by state or by job category and then charging a flat fee for each group within the segment (i.e. for each state or category). In other words they would charge different uniform prices for each state or job category. Use the data and the code to justify which approach you think would get them higher expected revenues.
 
