@@ -132,7 +132,7 @@ jtab = table(dz1$job_category_classified_by_ai)
 jtab=sort(jtab)
 ```
 
-Forth, for a cost of 0, we calculate the optimal price for every state using our function, and we store the revenue and price in a variable to later calculate the expected revenue per customer, and average price charged.
+Forth, for a cost of 0, we calculate the optimal price for every state using our function, and we store the revenue and price in a variable to later calculate the expected revenue per customer, and average price charged. Because we have insufficient data for some states, the price for those states can get absurdly high and unrealistic.  For that reason, we cap the price at at most $399.
 
 ```{r}
 # Set the cost
@@ -152,11 +152,11 @@ for (i in 1:length(jstatetab)){
 }
 rev.state/sum(jstatetab)
 price.state/sum(jstatetab)
-````
+```
 
-As appreciate the expected revenue per customer goes from __`r opt$objective`__ in the uniform case, to __`r rev.state/sum(jstatetab)`__ with an average price of __`r price.state/sum(jstatetab)`__
+The expected revenue per customer goes from __`r opt$objective`__ in the uniform case, to __`r rev.state/sum(jstatetab)`__ with an average price of __`r price.state/sum(jstatetab)`__
 
-Fifth, we do the same for every job description and we have
+Fifth, we do the same for every job description again capping price at a max of $399 and we have
 
 
 ```{r}
@@ -175,9 +175,9 @@ for (i in 1:43){
 }
 rev.job/sum(jtab)
 price.job/sum(jtab)
-````
+```
 
-As appreciate the expected revenue per customer goes from __`r opt$objective`__ in the uniform case, to __`r rev.job/sum(jtab)`__ with an average price of __`r price.job/sum(jtab)`__
+The expected revenue per customer goes from __`r opt$objective`__ in the uniform case, to __`r rev.job/sum(jtab)`__ with an average price of __`r price.job/sum(jtab)`__
 
 This is even better than segmenting by state, so we would prefer to segment by job description.
 
@@ -222,22 +222,22 @@ rev.job2/sum(jtab)
 price.job2/sum(jtab)
 ```
 
-Yes the answer change, since we will charge a higher price (inelastic demand in the two segmenting cases but the profits will fall for sure but not by 10 per customer)
+The answer that segmenting by job category is the better option does not change, but we will charge a higher price (inelastic demand in the two segmenting cases but the profits will fall for sure but not by 10 per customer)
 
 # As a summary
 ## Uniform pricing
-Prices are higher if cost is 10. The prices increases from __`r opt$maximum`__ to __`r opt1$maximum`__, and the Revenue per customer is lower if cost is 10, and it goes from __`r opt$objective`__ to __`r opt1$objective`__.
+Prices are higher if cost is 10. The prices increases from __`r opt$maximum`__ to __`r opt1$maximum`__. The profit per customer is lower if cost is 10; it goes from __`r opt$objective`__ to __`r opt1$objective`__.
 
 ## State pricing
-Prices are higher if cost is 10. The average prices increases from __`r price.state/sum(jstatetab)`__ to __`r price.state2/sum(jstatetab)`__, and the Revenue per customer is lower if cost is 10, and it goes from __`r rev.state/sum(jstatetab)`__ to __`r rev.state2/sum(jstatetab)`__ 
+Prices are higher if cost is 10. The average prices increases from __`r price.state/sum(jstatetab)`__ to __`r price.state2/sum(jstatetab)`__, and the profit per customer is lower if cost is 10; it goes from __`r rev.state/sum(jstatetab)`__ to __`r rev.state2/sum(jstatetab)`__ 
 
 Nonetheless, revenue per customer still higher than uniform pricing and the average price lower.
 
 
 ## Job Category pricing
-Prices are higher if cost is 10. The average prices increases from __`r price.job/sum(jtab)`__ to __`r price.job2/sum(jtab)`__, and the Revenue per customer is lower if cost is 10, and it goes from __`r rev.job/sum(jtab)`__ to __`r rev.job2/sum(jtab)`__.
+Prices are higher if cost is 10. The average prices increases from __`r price.job/sum(jtab)`__ to __`r price.job2/sum(jtab)`__, and the profit per customer is lower if cost is 10; it goes from __`r rev.job/sum(jtab)`__ to __`r rev.job2/sum(jtab)`__.
 
-The conclusion is that we still prefer to discriminate by Job Category rather than State, and much better than uniform pricing. Also, since demand is inelastic, a cost increase can be traspassed to customers in order to keep the expected revenue per customer almost the same (only a little drop)
+The conclusion is that we still prefer to discriminate by Job Category rather than State, and much better than uniform pricing. Also, since demand is inelastic, a cost increase can be passed to customers in order to keep the expected profit per customer almost the same (only a little drop)
 
 
 
