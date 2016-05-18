@@ -75,136 +75,175 @@ If the cost is equal to 0, the optimal price is __`r opt1$maximum`__, and the ex
 
 As appreciate, the increase of 10 in the cost only implies that the expected revenue per customer goes down by __`r opt1$objective-opt$objective`__. This happens because the demand is so inelastic that of the 10 cost increase, __`r opt1$maximum-opt$maximum`__ is traspased to the customer due to a price increase from __`r opt$maximum`__ to __`r opt1$maximum`__, and the rest is the drop in the expected customer revenue per customer.
 
-# Q2: Estimate two logit models based on the data (assuming a simple linear specification) - one for opens and another for clicks. Discuss your results based on the nature of the variables (see variable names and descriptions tab).
+# Q2: Ziprecruiter is deciding between segmenting their customer base either by state or by job category and then charging a flat fee for each group within the segment (i.e. for each state or category). In other words they would charge different uniform prices for each state or job category. Use the data and the code to justify which approach you think would get them higher expected revenues.
+
+First, we create a function to price discriminate based on state
 
 ```{r}
-df <- df[1:16, 4:14]
-df$successful_sent = df$unique_sent - df$bounced
+g3 = glm(SUB~(factor(job_state))*prc,data=dz1,family='binomial')
+
+predict.rev.state = function(price,jstate="CA", cost)
+{
+  #Supress Warnings
+  options(warn=-1)
+  # "New Data"
+  nd = data.frame(job_state=jstate,prc=price)
+  # Predict
+  phat = predict(g3,nd,type='response')  
+  # Reset Warnings
+  options(warn=0)
+  # Expected Revenues
+  erev = as.numeric(phat*(price-cost))
+  return(erev)
+}
 ```
 
-Logit model for Opens:
+Second, we create a function to price discriminate based on job category
 
 ```{r}
-opens_model <-
-  glm(cbind(unique_opened, successful_sent - unique_opened) ~ 
-        intro + headline + main_text + button + action + purpose + symbol,
-      data = df,
-      family = 'binomial')
+# Construct Prediction Function for job category price discrimination
+g4 = glm(SUB~(factor(job_category_classified_by_ai))*prc,data=dz1,family='binomial')
 
-summary(opens_model)
+predict.rev.job = function(price, jcat="Legal", cost)
+{
+  #Supress Warnings
+  options(warn=-1)
+  # "New Data"
+  nd = data.frame(job_category_classified_by_ai=jcat,prc=price)
+  # Predict
+  phat = predict(g4,nd,type='response')  
+  # Reset Warnings
+  options(warn=0)
+  # Expected Revenues
+  erev = as.numeric(phat*(price-cost))
+  return(erev)
+}
 ```
 
-Some comments on this model:
-
-- __Headline__: All options are not statistically different, suggesting the Headline does not reallyt matter to the probabilility of people opening the message;
-- __Main Text__: The second choice _"Check out our selection for you - add a new phone, tablet, or other device!"_ has a negative significant coefficient. This is perhaps because it is less informative than the first choice in terms of articulating the benefits;
-- __Action__: The second choice _"Click Here to..."_ is also negative and significant, suggesting a higher tendency for people to find that deceiving
+Third, we construct the variables to have levels for every unique state and job description
 
 ```{r}
-# Coefficients analysis
-Beta1 <- coef(opens_model)
-p.hat1 <- exp(Beta1["(Intercept)"])/(1+exp(Beta1["(Intercept)"]))
-p.data1 <- df$unique_opened[1]/df$"successful_sent"[1]
-Odds1 <- exp(Beta1); Odds1
+jstate = unique(dz1$job_state)
+jstatetab = table(dz1$job_state)
+jstatetab=sort(jstatetab)
+
+jcats = unique(dz1$job_category_classified_by_ai)
+jtab = table(dz1$job_category_classified_by_ai)
+jtab=sort(jtab)
 ```
 
-Nonetheless the comments on the model made before, as appreciated in the result of the odds, all odds for the model are very close to 1, this means that the base probability of opening an email :__`r p.hat1`__ is almost not affected by the variations in the model.
-
-
-This is in line with the no variability shown in the table below for the open rate:
-```{r}
-summary(df$'unique_open'/df$'successful_sent')
-```
-
-Also, the best message to obtain the maximium "open rate" given the parameters of the regression is: Intro L3, headlineL2, main_textL1, buttonL2, actionL1, purposeL2, and symbolL2.
-
-Logit model for Clicks:
+Forth, for a cost of 0, we calculate the optimal price for every state using our function, and we store the revenue and price in a variable to later calculate the expected revenue per customer, and average price charged.
 
 ```{r}
-clicks_model <-
-  glm(cbind(unique_clicks, successful_sent - unique_clicks) ~
-        intro + headline + main_text + button + action + purpose + symbol,
-      data = df,
-      family = 'binomial')
+# Set the cost
+cost=0
 
-summary(clicks_model)
-```
+rev.state=0
+price.state=0
+for (i in 1:length(jstatetab)){
+  # Optimizing price for every state
+  opt = optimize(f = predict.rev.state, interval = c(0,399), jstate=names(jstatetab[i]), cost, maximum = TRUE)
+  
+  # Aggregate revenue 
+  rev.state = rev.state +jstatetab[i]*opt$objective
+  
+  # Aggregate price
+  price.state = price.state +jstatetab[i]*opt$maximum
+}
+rev.state/sum(jstatetab)
+price.state/sum(jstatetab)
+````
 
-There are some notable differences in this model vs. the one for Opens:
+As appreciate the expected revenue per customer goes from __`r opt$objective`__ in the uniform case, to __`r rev.state/sum(jstatetab)`__ with an average price of __`r price.state/sum(jstatetab)`__
 
-- __Headline__: all options are statistically significantly different now, suggesting people do care about what the Headline says in deciding whether to follow through. The first option _"You'll Love It"_ seems to be the worst, suggesting a degree of distrust for such a claim;
-- __Action__: the second option _"Click Here to..."_ now has a positive significatn coefficient - so once people trust the content of the message, a prompt to click does lead to a higher tendency to click through.
+Fifth, we do the same for every job description and we have
+
 
 ```{r}
-# Coefficients analysis
-Beta2 <- coef(clicks_model)
-p.hat2 <- exp(Beta2["(Intercept)"])/(1+exp(Beta2["(Intercept)"]))
-p.data2 <- df$unique_clicks[1]/df$"successful_sent"[1]
-Odds2 <- exp(Beta2); Odds2
-```
+# Set the cost
+rev.job=0
+price.job=0
+for (i in 1:43){
+  # Optimizing price for every job category
+  opt = optimize(f = predict.rev.job, interval = c(0,399), jcat=jcats[i], cost, maximum = TRUE)
+  
+  # Aggregate revenue 
+  rev.job = rev.job + jtab[i]*opt$objective
+  
+  # Aggregate price
+  price.job = price.job + jtab[i]*opt$maximum
+}
+rev.job/sum(jtab)
+price.job/sum(jtab)
+````
 
-In line with the comments made above, as appreciated in the result of the odds, some odds for certain variables of the model are very different from 1, this means that the base probability of clicking an email :__`r p.hat2`__ is affected by the variations. 
+As appreciate the expected revenue per customer goes from __`r opt$objective`__ in the uniform case, to __`r rev.job/sum(jtab)`__ with an average price of __`r price.job/sum(jtab)`__
 
-For example, introL3 increases the odds by __`r Odds2['introL3']`__. Other important variables are headlineL2, headlineL3, and actionL2.
+This is even better than segmenting by state, so we would prefer to segment by job description.
 
-Also, the best message to obtain the maximium "click rate" given the parameters of the regression is: Intro L3, headlineL2, main_textL1, buttonL1, actionL2, purposeL1, and symbolL1.(A different message than the one needed to maximize the open rate).
+# Q3: Does your answer to Q2 change if you assume marginal costs per customer are $10 
+# and the decision was made based on profits rather than revenues?
 
-
-# Q3: Use the estimated models to compute predicted probabilities for all possible message combinations (separate predictions for opens and clicks). Which messages have the highes fitted response probabilities? Are the two messages similar or different? Discuss.
-
-```{r}
-all_combinations <-
-  gen.factorial(
-    levels = c(4, 4, 2, 2, 2, 4, 2),
-    factors = 'all',
-    varNames = c('intro',
-                 'headline',
-                 'main_text',
-                 'button',
-                 'action',
-                 'purpose',
-                 'symbol'))
-
-levels(all_combinations$intro) <- paste('L', 1:4, sep='')
-levels(all_combinations$headline) <- paste('L', 1:4, sep='')
-levels(all_combinations$main_text) <- paste('L', 1:2, sep='')
-levels(all_combinations$button) <- paste('L', 1:2, sep='')
-levels(all_combinations$action) <- paste('L', 1:2, sep='')
-levels(all_combinations$purpose) <- paste('L', 1:4, sep='')
-levels(all_combinations$symbol) <- paste('L', 1:2, sep='')
-```
-
-Open probabilities:
+We re run the Q2 code using a cost of 10.
 
 ```{r}
-open_probs <- predict(opens_model, newdata = all_combinations, type='response')
+cost=10
 
-summary(open_probs)
+# Total Revenue from State discrimination
+rev.state2=0
+price.state2=0
+for (i in 1:length(jstatetab)){
+  # Optimizing price for every state
+  opt = optimize(f = predict.rev.state, interval = c(0,399), jstate=names(jstatetab[i]), cost, maximum = TRUE)
+  
+  # Aggregate revenue 
+  rev.state2 = rev.state2 +jstatetab[i]*opt$objective
+  
+  # Aggregate price
+  price.state2 = price.state2 +jstatetab[i]*opt$maximum
+}
+rev.state2/sum(jstatetab)
+price.state2/sum(jstatetab)
+
+# Total Revenue from Job Category discrimination
+rev.job2=0
+price.job2=0
+for (i in 1:43){
+  # Optimizing price for every job category
+  opt = optimize(f = predict.rev.job, interval = c(0,399), jcat=jcats[i], cost, maximum = TRUE)
+  
+  # Aggregate revenue 
+  rev.job2 = rev.job2 + jtab[i]*opt$objective
+  
+  # Aggregate price
+  price.job2 = price.job2 + jtab[i]*opt$maximum
+}
+rev.job2/sum(jtab)
+price.job2/sum(jtab)
 ```
 
-The message with the highest predicted probability of being opened has the following configuration:
+Yes the answer change, since we will charge a higher price (inelastic demand in the two segmenting cases but the profits will fall for sure but not by 10 per customer)
 
-```{r}
-all_combinations[which.max(open_probs), ]
-```
+# As a summary
+## Uniform pricing
+Prices are higher if cost is 10. The prices increases from __`r opt$maximum`__ to __`r opt1$maximum`__, and the Revenue per customer is lower if cost is 10, and it goes from __`r opt$objective`__ to __`r opt1$objective`__.
 
-Overall, however, the probability of a message being opened ranges extremely narrowly in the mid-50%s. We can practically say that a message has a 50-50 chance of being opened, no matter how it appears.
+## State pricing
+Prices are higher if cost is 10. The average prices increases from __`r price.state/sum(jstatetab)`__ to __`r price.state2/sum(jstatetab)`__, and the Revenue per customer is lower if cost is 10, and it goes from __`r rev.state/sum(jstatetab)`__ to __`r rev.state2/sum(jstatetab)`__ 
 
-Click probabilities:
-
-```{r}
-click_probs <- predict(clicks_model, newdata = all_combinations, type='response')
-
-summary(click_probs)
-```
-
-The click-through probabilities, unlike the open probabilities, have meaningful variation among them. The message with the highest predicted probability of being clicked through has the following configuration:
-
-```{r}
-all_combinations[which.max(click_probs), ]
-```
+Nonetheless, revenue per customer still higher than uniform pricing and the average price lower.
 
 
-# Q4: Please use the historical data provided in the project section of chalk to provide me your experimental design. See HistData.R for details.
+## Job Category pricing
+Prices are higher if cost is 10. The average prices increases from __`r price.job/sum(jtab)`__ to __`r price.job2/sum(jtab)`__, and the Revenue per customer is lower if cost is 10, and it goes from __`r rev.job/sum(jtab)`__ to __`r rev.job2/sum(jtab)`__.
+
+The conclusion is that we still prefer to discriminate by Job Category rather than State, and much better than uniform pricing. Also, since demand is inelastic, a cost increase can be traspassed to customers in order to keep the expected revenue per customer almost the same (only a little drop)
+
+
+
+
+
+# Nonetheless, revenue per customer still higher than uniform pricing and state discrimination
+# and the average price lower than both of them
 
 

@@ -163,7 +163,7 @@ optimize(f = predict.profit, interval = c(0,1000),cost, maximum = TRUE)
 # In other words they would charge different uniform prices for each state or job category. 
 # Use the data and the code to justify which approach you think would get them higher expected 
 # revenues.
-cost=0
+
 # Construct Prediction Function for State price discrimination
 g3 = glm(SUB~(factor(job_state))*prc,data=dz1,family='binomial')
 
