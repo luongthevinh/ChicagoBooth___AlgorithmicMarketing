@@ -5,12 +5,13 @@
 # load data
 load(file = "Historical_Data.rdat")
 df <- read.csv("results_design1.csv")
+df3 <- read.csv("results_design2.csv")
 
 # Rename vars for later use
 colnames(df)[colnames(df)=="N"] <- "Unique_Sent"
 colnames(df)[colnames(df)=="Clicks"] <- "Unique_Clicks"
-df2 <- sapply(df[,1:9],as.factor)
-df[,1:9] <- df2[,1:9]
+df_aux <- sapply(df[,1:9],as.factor)
+df[,1:9] <- df_aux[,1:9]
 df <- as.data.frame(unclass(df))
 
 # Levels in our design for the analysis
@@ -236,6 +237,16 @@ df$Unique_Clicks/df$Unique_Sent
 #Run the regression on the combined data
 combined_model_int<-glm(cbind(Unique_Clicks,(Unique_Sent-Unique_Clicks))~.*.,data=combined_dat,family='binomial')
 
+# Mat
+library(AlgDesign)
+# Factorial design
+# Full Factorial Design
+mat = gen.factorial(
+  levels=c(6,6,3,3,5,4,2,5,6),
+  varNames=paste("V",1:9,sep=""),
+  factors="all"
+)
+
 # Interactions
 design_ctr1 <- 1/(1+exp(-predict.glm(combined_model_int, mat)))
 cbind(mat[design_ctr1>.159,],design_ctr1[design_ctr1>.159])
@@ -297,4 +308,41 @@ cbind(df2, design_ctr, design_ctr_int)
 
 library(xlsx)
 second_design <- read.xlsx("design2_a.xlsx", sheetIndex=1)
-write.csv(second_design, file="second_design.csv", row.names = FALSE)
+second_design$N <- 10000
+# write.csv(second_design, file="second_design.csv", row.names = FALSE)
+
+
+##########################################
+# Results from experiment 2
+
+# Rename vars for later use
+colnames(df3)[colnames(df3)=="N"] <- "Unique_Sent"
+colnames(df3)[colnames(df3)=="Clicks"] <- "Unique_Clicks"
+df_aux <- sapply(df3[,1:9],as.factor)
+df3[,1:9] <- df_aux[,1:9]
+df3 <- as.data.frame(unclass(df3))
+str(df3)
+
+#------------------------#
+# Estimation
+#------------------------#
+
+# Only the design
+df3d <- df3[,1:9]
+
+# Linear expected CTR
+design_ctr_2 <- 1/(1+exp(-predict.glm(combined_model, df3d))); design_ctr_2
+summary(design_ctr_2)
+
+# Interaction expected CTR
+design_ctr_int_2 <- 1/(1+exp(-predict.glm(combined_model_int, df3d))); design_ctr_int_2
+summary(design_ctr_int_2)
+
+# Real CTR
+real_ctr_df3d <- df3$Unique_Clicks/df3$Unique_Sent
+
+# Results
+cbind(df3d , design_ctr_2, design_ctr_int_2,real_ctr_df3d)
+
+# Expected Profitability for project: $107,820.2
+profit((N-(36*5000+22*10000))*0.2506+sum(df$Unique_Clicks)+sum(df3$Unique_Clicks),(36+22),0)

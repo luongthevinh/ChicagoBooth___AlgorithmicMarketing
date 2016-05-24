@@ -238,7 +238,16 @@ The conclusion is that we still prefer to discriminate by Job Category rather th
 
 ## It is important to notice that there are some states that have less than 10 observations, as well as job categories that have less than 10 observations, that's why when we run the regression, the optimal price is to charge the highest price in the range. We believe this is not correct, that's why we capped the price.
 
+```{r}
+barplot(tail(jtab,100), main="Histogram per Job Category")
+barplot(tail(jstatetab,100), main="Histogram per State")
+```
+
 ## Another approach to solve this problem would be to run a regression only for states and job categories with more than 10 observations, and offer a uniform price to the customers in states and job categories that we dont have further information
+
+
+
+
 
 # Appendix A: No cap in prices
 
