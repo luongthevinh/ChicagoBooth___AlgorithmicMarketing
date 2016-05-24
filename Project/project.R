@@ -114,8 +114,7 @@ boxplot(cfmat[,c("V92","V93","V94","V95","V96")])
 reg1 <- glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~.,data=df,family="binomial")
 reg2 <- glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~.*.,data=df,family="binomial")
 cf2 = coef(glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~.,data=df,family="binomial"))
-cf2
-
+cf
 # All variables distribution in a barplot to see differences
 # If someone can automate this please
 boxplot(cfmat[,2:32])
@@ -129,7 +128,8 @@ points(20,cf2[8],col="red", cex=1, pch=19) #V63
 points(22,cf2[9],col="red", cex=1, pch=19) #V72
 points(25,cf2[10],col="red", cex=1, pch=19) #V84
 points(30,cf2[11],col="red", cex=1, pch=19) #V95
-points(31,cf2[12],col="red", cex=1, pch=19) #V96
+points(31,cf2[12],col="red", cex=1, pch=19) #V962
+
 
 # Findind the best message
 # just to make my point clear
@@ -324,7 +324,7 @@ df3 <- as.data.frame(unclass(df3))
 str(df3)
 
 #------------------------#
-# Estimation
+# Results 2 Analysis
 #------------------------#
 
 # Only the design
@@ -341,8 +341,34 @@ summary(design_ctr_int_2)
 # Real CTR
 real_ctr_df3d <- df3$Unique_Clicks/df3$Unique_Sent
 
-# Results
+# Results combined
 cbind(df3d , design_ctr_2, design_ctr_int_2,real_ctr_df3d)
 
 # Expected Profitability for project: $107,820.2
 profit((N-(36*5000+22*10000))*0.2506+sum(df$Unique_Clicks)+sum(df3$Unique_Clicks),(36+22),0)
+
+# Bonus: New data in the boxplot
+df4 <- df3
+str(df4)
+str(df)
+# Eliminate columns with one level
+df4$V4<-NULL
+df4$V5<-NULL
+df4$V7<-NULL
+cf3 = coef(glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~.,data=df4,family="binomial"))
+cf3
+# All variables distribution in a barplot to see differences
+# If someone can automate this please
+points(3,cf3[2],col="blue", cex=1, pch=19) #V14
+points(4,cf3[3],col="blue", cex=1, pch=19) #V15
+points(7,cf3[4],col="blue", cex=1, pch=19) #V23
+points(10,cf3[5],col="blue", cex=1, pch=19) #V26
+points(11,cf3[6],col="blue", cex=1, pch=19) #V32
+points(12,cf3[7],col="blue", cex=1, pch=19) #V33
+points(20,cf3[8],col="blue", cex=1, pch=19) #V63
+points(26,cf3[9],col="blue", cex=1, pch=19) #V85
+points(29,cf3[10],col="blue", cex=1, pch=19) #V85
+points(30,cf3[11],col="blue", cex=1, pch=19) #V95
+
+
+
