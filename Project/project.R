@@ -114,7 +114,7 @@ boxplot(cfmat[,c("V92","V93","V94","V95","V96")])
 reg1 <- glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~.,data=df,family="binomial")
 reg2 <- glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~.*.,data=df,family="binomial")
 cf2 = coef(glm(cbind(Unique_Clicks,Unique_Sent-Unique_Clicks)~.,data=df,family="binomial"))
-cf
+cf2
 # All variables distribution in a barplot to see differences
 # If someone can automate this please
 boxplot(cfmat[,2:32])
@@ -181,7 +181,7 @@ for(i in indices) {
   j = j+num_campaigns
 }
 # Run the regression on the combined data
-combined_model<-glm(cbind(Unique_Clicks,(Unique_Sent-Unique_Clicks))~.-1,data=combined_dat,family='binomial')
+combined_model<-glm(cbind(Unique_Clicks,(Unique_Sent-Unique_Clicks))~.,data=combined_dat,family='binomial')
 summary(combined_model)
 Beta.h <- coef(combined_model)
 Odds.h <- exp(Beta.h); Odds.h
@@ -209,14 +209,14 @@ profit((N-(72*5000))*p.hat+2*sum(df$Unique_Clicks),72,0)
 profit((N-(72*5000))*0.2095+2*sum(df$Unique_Clicks),72,0)
 
 
-# Expected profit design 2 of 20 no improvement in clicks: 79754.94
-profit((N-(56*5000))*p.hat+sum(df$Unique_Clicks)+.165*(5000*20),56,0)
+# Expected profit design 2 of 22 no improvement in clicks: 79166.97
+profit((N-(58*5000))*p.hat+sum(df$Unique_Clicks)+.165*(5000*20),58,0)
 
-# CTR for design 2 of 36 to break even: 19.92%
-profit((N-(56*5000))*.197+sum(df$Unique_Clicks)+.165*(5000*20),56,0)
+# CTR for design 2 of 36 to break even: 19.82%
+profit((N-(58*5000))*.1982+sum(df$Unique_Clicks)+.165*(5000*20),58,0)
 
 # Gap to be improved?
-0.197-0.188
+0.1982-0.188
 
 
 # Model to try:
@@ -236,6 +236,8 @@ df$Unique_Clicks/df$Unique_Sent
 # All combination on historical data
 #Run the regression on the combined data
 combined_model_int<-glm(cbind(Unique_Clicks,(Unique_Sent-Unique_Clicks))~.*.,data=combined_dat,family='binomial')
+sort(coef(combined_model_int))
+
 
 # Mat
 library(AlgDesign)
